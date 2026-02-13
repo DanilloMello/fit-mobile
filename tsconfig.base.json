@@ -1,0 +1,43 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": ["es2020", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-native",
+    "allowJs": false,
+    "baseUrl": ".",
+    "paths": {
+      "@connecthealth/identity/domain": ["libs/identity/domain/src/index.ts"],
+      "@connecthealth/identity/application": ["libs/identity/application/src/index.ts"],
+      "@connecthealth/identity/infrastructure": ["libs/identity/infrastructure/src/index.ts"],
+      "@connecthealth/identity/ui": ["libs/identity/ui/src/index.ts"],
+      "@connecthealth/client/domain": ["libs/client/domain/src/index.ts"],
+      "@connecthealth/client/application": ["libs/client/application/src/index.ts"],
+      "@connecthealth/client/infrastructure": ["libs/client/infrastructure/src/index.ts"],
+      "@connecthealth/client/ui": ["libs/client/ui/src/index.ts"],
+      "@connecthealth/training/domain": ["libs/training/domain/src/index.ts"],
+      "@connecthealth/training/infrastructure": ["libs/training/infrastructure/src/index.ts"],
+      "@connecthealth/training/ui": ["libs/training/ui/src/index.ts"],
+      "@connecthealth/shared/domain": ["libs/shared/domain/src/index.ts"],
+      "@connecthealth/shared/ui": ["libs/shared/ui/src/index.ts"],
+      "@connecthealth/shared/utils": ["libs/shared/utils/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

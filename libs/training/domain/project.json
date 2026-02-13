@@ -1,0 +1,7 @@
+{
+  "name": "training-domain",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/training/domain/src",
+  "projectType": "library",
+  "tags": ["scope:training", "type:domain"]
+}
