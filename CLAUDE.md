@@ -8,13 +8,14 @@ This is the **mobile app** for ConnectHealth platform. For full project document
 
 ## Docs (multi-repo)
 
-Before working, read these docs from `.claude/common/`:
+Before working, read these docs:
 
-1. `docs/DOMAIN_SPEC.md` - Entities, enums, business rules
-2. `docs/API_REGISTRY.md` - API endpoints to consume from fit-api
-3. `skills/fit-mobile/SKILL.md` - React Native/NX patterns & conventions
-4. `fit-mobile/ARCHITECTURE.md` - Module structure & layers (if exists)
-5. `fit-mobile/SCREENS.md` - Screen specifications (if exists)
+1. `.claude/common/docs/DOMAIN_SPEC.md` - Entities, enums, business rules
+2. `.claude/common/docs/API_REGISTRY.md` - API endpoints to consume from fit-api
+3. `.claude/common/docs/CODING_GUIDELINES.md` - Coding standards
+4. `.claude/skills/fit-mobile/SKILL.md` - React Native/NX patterns & conventions
+5. `ARCHITECTURE.md` - Module structure & layers (if exists in root)
+6. `SCREENS.md` - Screen specifications (if exists in root)
 
 ## Architecture
 
