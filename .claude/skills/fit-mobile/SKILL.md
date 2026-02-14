@@ -5,7 +5,7 @@ description: Frontend skill for fit-mobile. React Native/NX patterns and convent
 
 # fit-mobile Skill
 
-> **Prereq**: Read `docs/DOMAIN_SPEC.md` and `docs/API_REGISTRY.md` first
+> **Prereq**: Use `fit-mobile-docs` MCP to read `DOMAIN_SPEC.md` and `API_REGISTRY.md` first
 
 ---
 
@@ -112,13 +112,13 @@ export default function ClientListScreen() {
 
 ## 4. API Integration
 
-See `docs/API_REGISTRY.md` for fit-api endpoints to consume.
+Use `fit-mobile-docs` MCP to read `API_REGISTRY.md` for fit-api endpoints to consume.
 
 ---
 
 ## 5. Checklist: New Feature
 
-- [ ] Read `docs/API_REGISTRY.md` for endpoint
+- [ ] Read `API_REGISTRY.md` via MCP for endpoint
 - [ ] Entity in `domain/`
 - [ ] API client in `infrastructure/`
 - [ ] Hook in `ui/hooks/`
