@@ -4,17 +4,17 @@
 
 ## Context
 
-This is the **mobile app** for ConnectHealth platform. For full project documentation, see `../fit-common/`.
+This is the **mobile app** for ConnectHealth platform. For full project documentation, see `.claude/common/`.
 
 ## Docs (multi-repo)
 
-Before working, read these docs from `../fit-common/`:
+Before working, read these docs from `.claude/common/`:
 
 1. `docs/DOMAIN_SPEC.md` - Entities, enums, business rules
 2. `docs/API_REGISTRY.md` - API endpoints to consume from fit-api
 3. `skills/fit-mobile/SKILL.md` - React Native/NX patterns & conventions
-4. `fit-mobile/ARCHITECTURE.md` - Module structure & layers
-5. `fit-mobile/SCREENS.md` - Screen specifications
+4. `fit-mobile/ARCHITECTURE.md` - Module structure & layers (if exists)
+5. `fit-mobile/SCREENS.md` - Screen specifications (if exists)
 
 ## Architecture
 
@@ -43,14 +43,14 @@ fit-mobile/
 
 ## Rules
 
-- Consume **fit-api** via `../fit-common/docs/API_REGISTRY.md` - never guess endpoints
+- Consume **fit-api** via `.claude/common/docs/API_REGISTRY.md` - never guess endpoints
 - Use TanStack Query for server state, Zustand for client state
 - Module imports: `@connecthealth/{identity,client,training,shared}`
 - Expo Router for navigation with file-based routing
 
 ## Sprint Plan
 
-See `../fit-common/docs/SPRINT_PLAN.md` for roadmap.
+See `.claude/common/docs/SPRINT_PLAN.md` for roadmap.
 
 ## Commands
 
