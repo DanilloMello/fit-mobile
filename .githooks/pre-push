@@ -36,7 +36,7 @@ fi
 # 1. TypeScript type check
 # ============================================================
 step "Running TypeScript type check..."
-if npx tsc --noEmit; then
+if npx tsc --project apps/mobile/tsconfig.json --noEmit; then
     success "Type check passed"
 else
     error "TypeScript type errors found. Fix before pushing."
@@ -67,7 +67,7 @@ fi
 # ============================================================
 step "Validating Expo Android bundle..."
 BUNDLE_DIR=$(mktemp -d)
-if (cd apps/mobile && npx expo export --platform android --output-dir "$BUNDLE_DIR" --quiet 2>&1); then
+if (cd apps/mobile && npx expo export --platform android --output-dir "$BUNDLE_DIR" 2>&1); then
     success "Expo Android bundle valid"
 else
     error "Expo bundle failed. Debug with: cd apps/mobile && npx expo export --platform android --output-dir /tmp/test"
