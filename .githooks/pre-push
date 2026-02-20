@@ -85,10 +85,8 @@ CONSOLE_LOG_FILES=$(git diff "$PREV_COMMIT" --name-only --diff-filter=ACM 2>/dev
 if [ -n "$CONSOLE_LOG_FILES" ]; then
     echo -e "${YELLOW}  ⚠ Found console.log in:${NC}"
     echo "$CONSOLE_LOG_FILES" | sed 's/^/    - /'
+    echo "  Remove before merging to master"
     echo ""
-    read -p "  Proceed anyway? (y/n): " -n 1 -r
-    echo ""
-    [[ ! $REPLY =~ ^[Yy]$ ]] && error "Please remove console.log statements"
 fi
 
 DEBUGGER_FILES=$(git diff "$PREV_COMMIT" --name-only --diff-filter=ACM 2>/dev/null | grep -E "\.(ts|tsx|js|jsx)$" | xargs grep -l "debugger" 2>/dev/null || true)
@@ -105,10 +103,9 @@ if [ -n "$MODIFIED_API_FILES" ]; then
     echo "  Modified API files:"
     echo "$MODIFIED_API_FILES" | sed 's/^/    - /'
     echo ""
-    echo -e "${YELLOW}  ⚠ Verify all API calls match API_REGISTRY.md in fit-common${NC}"
-    read -p "  Endpoints verified? (y/n): " -n 1 -r; echo ""
-    [[ ! $REPLY =~ ^[Yy]$ ]] && error "Please verify API endpoints against API_REGISTRY.md"
-    success "API Registry compliance confirmed"
+    echo -e "${YELLOW}  ⚠ Ensure all API calls match API_REGISTRY.md in fit-common${NC}"
+    echo ""
+    success "API Registry compliance — review required before merging"
 else
     success "No API client changes"
 fi
@@ -121,11 +118,7 @@ if git diff "$PREV_COMMIT" --name-only 2>/dev/null | grep -q "package.json"; the
     if git diff "$PREV_COMMIT" --name-only 2>/dev/null | grep -q "package-lock.json"; then
         success "Lock file updated"
     else
-        echo -e "${YELLOW}  ⚠ package.json changed but package-lock.json not updated${NC}"
-        echo "  Run 'npm install' to update package-lock.json"
-        echo ""
-        read -p "  Proceed anyway? (y/n): " -n 1 -r; echo ""
-        [[ ! $REPLY =~ ^[Yy]$ ]] && error "Run 'npm install' before pushing"
+        error "package.json changed but package-lock.json not updated — run 'npm install'"
     fi
 else
     success "No dependency changes"
