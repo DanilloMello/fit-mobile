@@ -8,13 +8,9 @@
       "command": "cmd",
       "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem", "C:\\Users\\Danil\\projetos\\fit-mobile\\.claude\\skills"]
     },
-    "fit-mobile-scripts": {
-      "command": "cmd",
-      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem", "C:\\Users\\Danil\\projetos\\fit-common\\scripts"]
-    },
     "fit-mobile-hooks": {
       "command": "cmd",
-      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem", "C:\\Users\\Danil\\projetos\\fit-common\\templates\\hooks"]
+      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem", "C:\\Users\\Danil\\projetos\\fit-mobile\\.githooks"]
     }
   }
 }

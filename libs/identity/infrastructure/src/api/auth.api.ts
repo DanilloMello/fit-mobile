@@ -1,10 +1,3 @@
-// TODO: Implement auth API client in Sprint 1
-// This module will handle:
-// - POST /auth/signin
-// - POST /auth/signup
-// - POST /auth/refresh
-// - POST /auth/logout
-
 import { apiClient } from '@connecthealth/shared/utils';
 
 export interface SignInRequest {
@@ -18,29 +11,41 @@ export interface SignUpRequest {
   password: string;
 }
 
-export interface AuthResponse {
+export interface AuthUser {
+  id: string;
+  name: string;
+}
+
+export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
+  expiresIn: number;
+}
+
+export interface AuthResponse {
+  user: AuthUser;
+  tokens: AuthTokens;
+}
+
+interface ApiAuthResponse {
+  data: AuthResponse;
 }
 
 export const authApi = {
-  signIn: async (_data: SignInRequest): Promise<AuthResponse> => {
-    // TODO: Implement
-    const response = await apiClient.post<AuthResponse>('/auth/signin', _data);
-    return response.data;
+  signIn: async (data: SignInRequest): Promise<AuthResponse> => {
+    const response = await apiClient.post<ApiAuthResponse>('/auth/login', data);
+    return response.data.data;
   },
 
-  signUp: async (_data: SignUpRequest): Promise<AuthResponse> => {
-    // TODO: Implement
-    const response = await apiClient.post<AuthResponse>('/auth/signup', _data);
-    return response.data;
+  signUp: async (data: SignUpRequest): Promise<AuthResponse> => {
+    const response = await apiClient.post<ApiAuthResponse>('/auth/register', data);
+    return response.data.data;
   },
 
-  refreshToken: async (_refreshToken: string): Promise<AuthResponse> => {
-    // TODO: Implement
-    const response = await apiClient.post<AuthResponse>('/auth/refresh', {
-      refreshToken: _refreshToken,
+  refreshToken: async (refreshToken: string): Promise<AuthResponse> => {
+    const response = await apiClient.post<ApiAuthResponse>('/auth/refresh', {
+      refreshToken,
     });
-    return response.data;
+    return response.data.data;
   },
 };
