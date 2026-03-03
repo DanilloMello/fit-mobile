@@ -5,7 +5,8 @@ description: Frontend skill for fit-mobile. React Native/NX patterns and convent
 
 # fit-mobile Skill
 
-> **Prereq**: Use `fit-mobile-docs` MCP to read `DOMAIN_SPEC.md` and `API_REGISTRY.md` first
+> **Prereq**: Use `github` MCP to read `docs/DOMAIN_SPEC.md` and `docs/API_REGISTRY.md` from fit-common before implementing features.
+> Use `context7` MCP to look up correct API signatures for any package in the stack.
 
 ---
 
@@ -281,19 +282,14 @@ export function setAuthToken(token: string | null) {
 
 ---
 
-## 7. EAS Build & Local Dev
+## 7. Development & Builds
 
-### Local dev on USB device (preferred for daily dev — no cloud needed)
+### Daily dev with Expo Go (phone via USB or LAN)
 ```bash
-# One-time: build dev client APK on your machine
 cd apps/mobile
-eas build --local --platform android --profile development
-adb install build-*.apk           # install on USB-connected device
-
-# Every day: just start Metro — changes hot-reload on device
-npx expo start --dev-client
+npx expo start            # Start Metro — scan QR code with Expo Go app
 ```
-The dev client APK only needs to be rebuilt when native dependencies change.
+No native build needed. All JS/TS changes hot-reload instantly.
 
 ### EAS Cloud Builds (run from `apps/mobile/`)
 ```bash
@@ -301,17 +297,10 @@ eas build --platform android --profile preview     # APK — QA / testers
 eas build --platform android --profile production  # AAB — Play Store
 ```
 
-| Profile | Build | Output | Use |
-|---------|-------|--------|-----|
-| `development` | local or cloud | dev client APK | daily dev with USB hot-reload |
-| `preview` | cloud | APK | internal QA distribution |
-| `production` | cloud | AAB | Play Store submission |
-
-### Local bundle validation (before pushing to EAS)
-```bash
-cd apps/mobile
-npx expo export --platform android --output-dir /tmp/bundle-test
-```
+| Profile | Output | Use |
+|---------|--------|-----|
+| `preview` | APK | internal QA distribution |
+| `production` | AAB | Play Store submission |
 
 ---
 
@@ -321,7 +310,8 @@ npx expo export --platform android --output-dir /tmp/bundle-test
 - **Client state**: Zustand — no `persist` middleware unless explicitly required
 - **Styles**: always `StyleSheet.create` — no inline style objects
 - **Env vars**: prefix with `EXPO_PUBLIC_` for client-exposed values
-- **Endpoints**: always read `API_REGISTRY.md` via `fit-mobile-docs` MCP — never guess URLs
+- **Endpoints**: always read `docs/API_REGISTRY.md` via `github` MCP (fit-common) — never guess URLs
+- **Library docs**: use `context7` MCP for up-to-date hook/API signatures for any package
 - **Imports**: use `@connecthealth/*` paths — never relative imports across modules
 - **Error handling**: catch `unknown`, narrow with `instanceof Error`
 
@@ -329,7 +319,7 @@ npx expo export --platform android --output-dir /tmp/bundle-test
 
 ## 9. Checklist: New Feature
 
-- [ ] Read `API_REGISTRY.md` via `fit-mobile-docs` MCP for endpoint contract
+- [ ] Read `docs/API_REGISTRY.md` via `github` MCP (fit-common) for endpoint contract
 - [ ] Entity in `libs/{module}/domain/src/entities/`
 - [ ] API client in `libs/{module}/infrastructure/src/api/`
 - [ ] Hook in `libs/{module}/ui/src/hooks/`

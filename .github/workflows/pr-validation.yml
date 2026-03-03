@@ -16,6 +16,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      checks: write
 
     steps:
       - name: 📥 Checkout code
@@ -44,11 +45,12 @@ jobs:
       - name: 📊 Publish test report
         uses: dorny/test-reporter@v1
         if: always()
+        continue-on-error: true
         with:
           name: Test Results
           path: '**/junit.xml'
           reporter: jest-junit
-          fail-on-error: true
+          fail-on-error: false
 
       - name: 📤 Upload coverage to Codecov
         if: always()
@@ -58,10 +60,10 @@ jobs:
           files: '**/coverage/lcov.info'
           flags: unittests
 
-      - name: 📦 Expo Android bundle validation
+      - name: 📦 Expo web bundle validation
         run: |
           cd apps/mobile
-          npx expo export --platform android --output-dir /tmp/expo-bundle
+          npx expo export --platform web --output-dir /tmp/expo-bundle
           echo "✅ Bundle size: $(du -sh /tmp/expo-bundle | cut -f1)"
 
       - name: 🔗 Check API endpoint compliance

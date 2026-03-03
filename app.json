@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "@connecthealth/source",
+    "slug": "@connecthealthsource",
+    "version": "0.0.1",
+    "sdkVersion": "52.0.0",
+    "newArchEnabled": true,
+    "platforms": [
+      "ios",
+      "android"
+    ]
+  }
+}
