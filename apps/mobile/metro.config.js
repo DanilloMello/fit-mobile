@@ -27,9 +27,11 @@ config.resolver.extraNodeModules = {
   https: require.resolve('https-browserify'),
   os: require.resolve('os-browserify/browser'),
   path: require.resolve('path-browserify'),
-  zlib: require.resolve('browserify-zlib'),
   assert: require.resolve('assert'),
   // empty shims — never called at runtime in React Native
+  // zlib: browserify-zlib crashes on init in RN 0.76 New Architecture;
+  // axios uses native XHR so zlib is never actually invoked at runtime
+  zlib: emptyModule,
   fs: emptyModule,
   net: emptyModule,
   tls: emptyModule,
