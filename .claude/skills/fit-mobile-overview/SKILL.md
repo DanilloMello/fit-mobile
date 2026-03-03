@@ -14,9 +14,9 @@ description: Frontend skill for fit-mobile. React Native/NX patterns and convent
 
 | Tool | Version |
 |------|---------|
-| React Native | 0.73.4 |
-| Expo | ~50.0.0 |
-| Expo Router | ~3.4.0 |
+| React Native | 0.76.9 |
+| Expo | ~52.0.0 |
+| Expo Router | ~4.0.0 |
 | TypeScript | ~5.3.3 |
 | TanStack Query | ^5.17.0 |
 | Zustand | ^4.5.0 |
@@ -199,6 +199,25 @@ export function useAuth() {
   };
 
   return { user, isAuthenticated, isLoading, error, signIn };
+}
+```
+
+### Root Layout Auth Guard (`apps/mobile/src/app/_layout.tsx`)
+```typescript
+// Expo Router 4: use declarative <Redirect>, NOT useEffect + useRouter
+// useRouter().replace() inside useEffect causes race conditions in Expo Router 4
+import { Redirect, Slot, useSegments } from 'expo-router';
+import { useAuthStore } from '@connecthealth/identity/application';
+
+function AuthGuard() {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const segments = useSegments();
+  const inAuthGroup = segments[0] === '(auth)';
+
+  if (!isAuthenticated && !inAuthGroup) return <Redirect href="/(auth)/signin" />;
+  if (isAuthenticated && inAuthGroup) return <Redirect href="/(app)/home" />;
+
+  return <Slot />;
 }
 ```
 

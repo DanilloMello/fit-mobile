@@ -1,6 +1,6 @@
 # ConnectHealth - fit-mobile
 
-> NX | React Native 0.73 | Expo 50 | TypeScript
+> NX | React Native 0.76 | Expo 52 | TypeScript
 
 ## Context
 
@@ -38,7 +38,7 @@ Key packages in this project: `expo`, `react-native`, `@tanstack/react-query`, `
 ## Skills
 
 **If you need patterns and conventions:**
-- `.claude/skills/fit-mobile/SKILL.md` - React Native/NX patterns & conventions
+- `.claude/skills/fit-mobile-overview/SKILL.md` - React Native/NX patterns & conventions
 
 ## Hook
 
