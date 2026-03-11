@@ -28,10 +28,9 @@ config.resolver.extraNodeModules = {
   os: require.resolve('os-browserify/browser'),
   path: require.resolve('path-browserify'),
   assert: require.resolve('assert'),
-  // empty shims — never called at runtime in React Native
-  // zlib: browserify-zlib crashes on init in RN 0.76 New Architecture;
-  // axios uses native XHR so zlib is never actually invoked at runtime
-  zlib: emptyModule,
+  // constants-only zlib shim — browserify-zlib crashes on RN 0.76 New Arch;
+  // axios reads Z_SYNC_FLUSH at module load time but never compresses on RN
+  zlib: path.resolve(__dirname, '_zlib-shim.js'),
   fs: emptyModule,
   net: emptyModule,
   tls: emptyModule,
