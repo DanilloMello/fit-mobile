@@ -1,26 +1,44 @@
 # ConnectHealth - fit-mobile
 
-> NX | React Native 0.73 | Expo 50 | TypeScript
+> NX | React Native 0.76 | Expo 52 | TypeScript
 
 ## Context
 
 This is the **mobile app** for ConnectHealth platform.
 Shared documentation lives in the **fit-common** sibling repo and is accessed via MCP servers.
 
-## Common Docs (via MCP)
+## Common Docs (via MCP — GitHub)
 
-**If you need any of these docs, use the `fit-mobile-docs` MCP server:**
-- `DOMAIN_SPEC.md` - Entities, enums, business rules
-- `API_REGISTRY.md` - API endpoints to consume from fit-api
-- `CODING_GUIDELINES.md` - Coding standards
-- `PRD.md` - Product requirements
-- `SPRINT_PLAN.md` - Development roadmap
-- `VALIDATION_SETUP.md` - Pre-push hooks and CI/CD
+**Use the `github` MCP server to read docs from the fit-common sibling repo.**
+Repo: `<org>/fit-common` · branch: `main` · base path: `docs/`
+
+| File | Purpose |
+|------|---------|
+| `docs/DOMAIN_SPEC.md` | Entities, enums, business rules |
+| `docs/API_REGISTRY.md` | API endpoints to consume from fit-api |
+| `docs/CODING_GUIDELINES.md` | Coding standards |
+| `docs/PRD.md` | Product requirements |
+| `docs/SPRINT_PLAN.md` | Development roadmap |
+| `docs/VALIDATION_SETUP.md` | Pre-push hooks and CI/CD |
+
+> Never guess API endpoints — always read `API_REGISTRY.md` via the `github` MCP before implementing any API call.
+
+## Dependency Docs (via MCP — Context7)
+
+**Use the `context7` MCP server whenever you need up-to-date documentation or code examples for a library.**
+
+When to use it:
+- Adding a new dependency or upgrading an existing one
+- Unsure about the correct API / hook signature for a library
+- Troubleshooting unexpected behaviour from a third-party package
+- Verifying compatibility between library versions
+
+Key packages in this project: `expo`, `react-native`, `@tanstack/react-query`, `zustand`, `expo-router`, `axios`, `zod`, `nativewind`.
 
 ## Skills
 
 **If you need patterns and conventions:**
-- `.claude/skills/fit-mobile/SKILL.md` - React Native/NX patterns & conventions
+- `.claude/skills/fit-mobile-overview/SKILL.md` - React Native/NX patterns & conventions
 
 ## Hook
 
@@ -32,21 +50,27 @@ On a fresh clone, run once:
 git config core.hooksPath .githooks
 ```
 
-Checks: TypeScript → ESLint → tests → Expo Android bundle → guidelines → API Registry
+Checks: TypeScript → ESLint → tests → Expo web bundle → guidelines → API Registry
 
 ## Architecture
 
 ```
 fit-mobile/
 ├── apps/
-│   └── mobile/src/app/      # Expo Router screens
-│       ├── (auth)/          # Login, Register
-│       └── (app)/           # Authenticated tabs
+│   └── mobile/              # Expo app
+│       ├── src/app/         # Expo Router screens
+│       │   ├── (auth)/      # Login, Register
+│       │   └── (app)/       # Authenticated tabs (home, clients, plans, profile)
+│       ├── eas.json         # EAS Build profiles
+│       └── metro.config.js  # Metro + NX + Node polyfills
 ├── libs/
 │   ├── identity/            # Auth domain + API + store
 │   ├── client/              # Client domain + API + hooks
 │   ├── training/            # Training domain + API + hooks
 │   └── shared/              # Base classes, API client, shared UI
+├── docs/
+│   ├── sprints/             # Sprint planning docs
+│   └── UI_PATTERNS.md       # Mobile UI patterns & React Native best practices
 └── package.json
 ```
 
@@ -61,7 +85,7 @@ fit-mobile/
 
 ## Rules
 
-- Consume **fit-api** via `API_REGISTRY.md` (use `fit-mobile-docs` MCP) - never guess endpoints
+- Consume **fit-api** via `API_REGISTRY.md` (use `github` MCP on fit-common) — never guess endpoints
 - Use TanStack Query for server state, Zustand for client state
 - Module imports: `@connecthealth/{identity,client,training,shared}`
 - Expo Router for navigation with file-based routing
@@ -104,9 +128,9 @@ chore(deps): add expo-crypto polyfill
 
 | Gate | Trigger | Checks |
 |------|---------|--------|
-| `pre-push` hook | every `git push` | TypeScript, ESLint, tests, **Expo Android bundle** |
+| `pre-push` hook | every `git push` | TypeScript, ESLint, tests, **Expo web bundle** |
 | GitHub Actions `validate` job | every push/PR to any branch | same as above + coverage + security audit |
-| GitHub Actions `eas-build` job | push to `master` or PR → `master` | EAS preview APK build (cloud) |
+| GitHub Actions `eas-build` job | push to `master` or PR → `master` | EAS cloud build |
 
 **Pre-push hook** — source at `.githooks/pre-push` (version-controlled in this repo).
 On a fresh clone, run once: `git config core.hooksPath .githooks`
@@ -126,25 +150,22 @@ On a fresh clone, run once: `git config core.hooksPath .githooks`
 
 ```bash
 npx nx run mobile:start             # Start Expo dev server
-npx nx run mobile:ios               # Run on iOS simulator
-npx nx run mobile:android           # Run on Android emulator
 npx nx test                         # Run all tests
 
-# Local dev on USB device (no cloud build needed)
-eas build --local --platform android --profile development   # one-time APK
-adb install build-*.apk                                       # install on device
-npx expo start --dev-client                                   # hot-reload over USB/LAN
+# Development (Expo Go on phone via USB or LAN)
+cd apps/mobile
+npx expo start                       # Start Metro — scan QR with Expo Go app
 
-# EAS cloud builds
+# EAS cloud builds — run from apps/mobile/
 eas build --platform android --profile preview     # APK for QA
 eas build --platform android --profile production  # AAB for Play Store
 ```
 
 ## fit-common Structure Sync Rule
 
-> **IMPORTANT**: When implementing code, check the fit-common repo structure.
-> If new docs, scripts, or hooks were added/removed in fit-common, update the
-> lists above to reflect the current structure. This CLAUDE.md must always
+> **IMPORTANT**: When implementing code, fetch the fit-common repo structure via the `github` MCP.
+> If new docs, scripts, or hooks were added/removed in fit-common, update the table in
+> "Common Docs" above to reflect the current structure. This CLAUDE.md must always
 > mirror what's available in fit-common.
 >
 > Current fit-common structure this file tracks:

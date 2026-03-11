@@ -1,16 +1,25 @@
 {
   "mcpServers": {
-    "fit-mobile-docs": {
+    "github": {
       "command": "cmd",
-      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem", "C:\\Users\\Danil\\projetos\\fit-common\\docs"]
+      "args": ["/c", "npx -y @modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
     },
-    "fit-mobile-skills": {
-      "command": "cmd",
-      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem", "C:\\Users\\Danil\\projetos\\fit-mobile\\.claude\\skills"]
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
+      }
     },
-    "fit-mobile-hooks": {
-      "command": "cmd",
-      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-filesystem", "C:\\Users\\Danil\\projetos\\fit-mobile\\.githooks"]
+    "figma": {
+      "type": "http",
+      "url": "https://figma.com/api/mcp",
+      "headers": {
+        "Authorization": "Bearer ${FIGMA_PERSONAL_ACCESS_TOKEN}"
+      }
     }
   }
 }
