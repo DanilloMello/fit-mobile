@@ -60,8 +60,27 @@ config.resolver.extraNodeModules = {
   punycode: emptyModule,
 };
 
-module.exports = withNxMetro(config, {
+const nxConfig = withNxMetro(config, {
   debug: false,
   extensions: ['ts', 'tsx', 'js', 'jsx'],
   watchFolders: [workspaceRoot],
 });
+
+// Expo SDK 54 + Expo Router 5 requests the entry as a relative path
+// (./node_modules/expo-router/entry). withNxMetro overwrites resolveRequest,
+// so we wrap it AFTER to intercept the entry before the NX resolver sees it.
+const nxResolveRequest = nxConfig.resolver.resolveRequest;
+nxConfig.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (
+    moduleName === 'expo-router/entry' ||
+    moduleName.endsWith('/node_modules/expo-router/entry')
+  ) {
+    return {
+      type: 'sourceFile',
+      filePath: require.resolve('expo-router/entry'),
+    };
+  }
+  return nxResolveRequest(context, moduleName, platform);
+};
+
+module.exports = nxConfig;
