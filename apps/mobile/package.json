@@ -2,7 +2,7 @@
   "name": "@connecthealth/mobile",
   "version": "0.0.1",
   "private": true,
-  "main": "src/app/_layout.tsx",
+  "main": "expo-router/entry",
   "packageManager": "npm@10.0.0",
   "scripts": {
     "start": "expo start",
@@ -11,7 +11,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "react-dom": "19.1.0",
+    "react-dom": "19.1.4",
     "react-native-web": "^0.21.0"
   }
 }
