@@ -65,6 +65,7 @@ coverage/
 .claude/docs
 .claude/docs.backup
 .claude/settings.local.json
+.mcp.json
 
 # Environment
 .env

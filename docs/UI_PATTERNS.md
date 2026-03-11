@@ -88,6 +88,98 @@ export const typography = {
 
 ---
 
+## 3. Component Architecture (Atomic Design)
+
+Components inside every `libs/{module}/ui/src/components/` directory follow **Atomic Design**. Screens (`apps/mobile/src/app/`) act as Pages — they receive data and compose organisms.
+
+### 3.0 Hierarchy
+
+| Level | Where | Rule |
+|-------|-------|------|
+| **Atom** | `components/atoms/` | Primitive, zero business logic. Receives only style/value props. |
+| **Molecule** | `components/molecules/` | Composes atoms into a functional unit. May have local UI state. |
+| **Organism** | `components/organisms/` | Composes molecules/atoms into a self-contained section. May accept domain-shaped props. |
+| **Screen/Page** | `apps/mobile/src/app/` | Expo Router file. Fetches data via hooks and composes organisms. |
+
+Templates are not used — Expo Router layouts (`_layout.tsx`) fill that role.
+
+### 3.0.1 Placement decision tree
+
+```
+Is it a single, indivisible UI element (button, icon, badge, input)?
+  → Atom
+
+Does it combine 2+ atoms into one functional unit (labeled input, list item, card)?
+  → Molecule
+
+Does it combine molecules/atoms into a complete UI section (form, list, header)?
+  → Organism
+
+Does it fetch data and render a full screen?
+  → Screen (apps/mobile/src/app/)
+```
+
+### 3.0.2 Folder structure
+
+```
+libs/shared/ui/src/components/
+├── atoms/
+│   ├── Button.tsx
+│   ├── Icon.tsx
+│   ├── Skeleton.tsx
+│   └── index.ts
+├── molecules/
+│   ├── Card.tsx
+│   ├── InputField.tsx
+│   ├── ListItem.tsx
+│   └── index.ts
+└── organisms/
+    ├── EmptyState.tsx
+    ├── ErrorState.tsx
+    └── index.ts
+
+libs/client/ui/src/components/
+├── molecules/
+│   ├── ClientCard.tsx
+│   └── index.ts
+└── organisms/
+    ├── ClientList.tsx
+    └── index.ts
+```
+
+Domain libs (`client`, `identity`, `training`) start at **molecules** — atoms always live in `shared/ui`.
+
+### 3.0.3 Exports
+
+Each atomic folder exposes a barrel:
+
+```typescript
+// libs/shared/ui/src/components/atoms/index.ts
+export { Button } from './Button';
+export { Icon } from './Icon';
+export { Skeleton } from './Skeleton';
+
+// libs/shared/ui/src/components/molecules/index.ts
+export { Card } from './Card';
+export { InputField } from './InputField';
+export { ListItem } from './ListItem';
+
+// libs/shared/ui/src/index.ts — re-export all levels
+export * from './components/atoms';
+export * from './components/molecules';
+export * from './components/organisms';
+export * from './tokens';
+```
+
+Import via the module alias — never use deep relative paths across libs:
+
+```typescript
+import { Button, Card, EmptyState } from '@connecthealth/shared/ui';
+import { ClientCard } from '@connecthealth/client/ui';
+```
+
+---
+
 ## 3. Component Patterns
 
 ### 3.1 Button
@@ -834,6 +926,6 @@ import { Skeleton } from '@connecthealth/shared/ui';
 
 ---
 
-**Last Updated:** 2026-02-15
-**Version:** 1.0
+**Last Updated:** 2026-03-03
+**Version:** 1.1
 **Extends:** DESIGN_SYSTEM.md (fit-common)
