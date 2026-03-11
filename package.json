@@ -8,10 +8,14 @@
     "ios": "nx run-ios mobile",
     "test": "nx run-many --target=test --all",
     "lint": "nx run-many --target=lint --all",
-    "build": "nx run-many --target=build --all"
+    "build": "nx run-many --target=build --all",
+    "build:tokens": "nx run shared-ui:build-tokens"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
+    "@react-native-community/cli": "~18.0.0",
+    "@react-native-community/cli-platform-android": "~18.0.0",
+    "@react-native-community/cli-platform-ios": "~18.0.0",
     "@tanstack/react-query": "^5.17.0",
     "assert": "^2.1.0",
     "axios": "^1.7.0",
@@ -37,10 +41,7 @@
     "react-native-web": "0.21.2",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
-    "zustand": "^5.0.0",
-    "@react-native-community/cli": "~18.0.0",
-    "@react-native-community/cli-platform-android": "~18.0.0",
-    "@react-native-community/cli-platform-ios": "~18.0.0"
+    "zustand": "^5.0.0"
   },
   "devDependencies": {
     "@nx/expo": "22.5.4",
@@ -53,7 +54,8 @@
     "eslint": "^8.56.0",
     "nx": "22.5.4",
     "prettier": "^3.2.0",
-    "typescript": "~5.8.3",
-    "react-native-svg-web": "~1.0.9"
+    "react-native-svg-web": "~1.0.9",
+    "style-dictionary": "^4.4.0",
+    "typescript": "~5.8.3"
   }
 }

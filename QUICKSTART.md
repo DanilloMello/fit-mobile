@@ -57,6 +57,24 @@ npx nx run mobile:android
 npx nx test
 ```
 
+## Design System Tokens
+
+Design tokens live in `libs/shared/ui/src/tokens/tokens.json` (Tokens Studio format).
+After updating tokens via the Figma plugin, regenerate the TypeScript constants:
+
+```bash
+npm run build:tokens
+# or
+npx nx run shared-ui:build-tokens
+```
+
+**Design-first flow:**
+1. Designer updates tokens in Figma via **Tokens Studio** plugin → exports to `tokens.json`
+2. Dev runs `npm run build:tokens` → regenerates `colors.ts`, `spacing.ts`, `typography.ts`, `radii.ts`, `shadows.ts`
+3. Commit both `tokens.json` and the generated `*.ts` files together
+
+> The generated files have an `// auto-generated` header — edit `tokens.json`, not the `.ts` files directly.
+
 ## MCP Setup
 
 The `.claude/mcp.json` is already configured. When you open this project in Claude Code, it automatically connects to fit-common docs via MCP servers. No manual setup needed.
