@@ -15,6 +15,12 @@ config.resolver.nodeModulesPaths = [
 
 config.resolver.resolverMainFields = ['react-native', 'browser', 'main'];
 
+// Disable Metro's package-exports resolver so libraries like axios resolve to
+// their browser-safe bundles instead of the Node.js CJS bundle.
+// The Node.js bundle imports `zlib.constants` which is unavailable in the
+// React Native JS runtime (Hermes). See: https://github.com/expo/expo/issues/30870
+config.resolver.unstable_enablePackageExports = false;
+
 // Shim every Node built-in that cannot run on Hermes/React Native
 const emptyModule = path.resolve(__dirname, '_empty-module.js');
 config.resolver.extraNodeModules = {
