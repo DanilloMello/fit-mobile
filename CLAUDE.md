@@ -9,29 +9,7 @@ Shared documentation lives in the **fit-common** GitHub repo: `DanilloMello/fit-
 
 ## Git Workflow — MANDATORY
 
-Every task follows this branching model. No exceptions.
-
-1. **Always branch from `develop`**:
-   ```bash
-   git checkout develop && git pull
-   git checkout -b <type>/<short-description>   # e.g. feat/client-list, fix/auth-crash, chore/upgrade-deps
-   git push -u origin HEAD
-   ```
-
-2. **Commit frequently** — after each logical unit of work (one concern per commit). Use Conventional Commits:
-   ```
-   feat(scope): description
-   fix(scope): description
-   chore(scope): description
-   docs(scope): description
-   refactor(scope): description
-   ```
-
-3. **Push every commit immediately** after creating it.
-
-4. **Never commit directly to `develop` or `master`** — always open a PR.
-
-5. **PR target**: feature branches → `develop`; `develop` → `master` for production releases only.
+Run **`/gitflow`** before any task that involves branching, committing, or opening a PR. It fetches the live conventions from fit-common and enforces them.
 
 ## How to start any task
 
