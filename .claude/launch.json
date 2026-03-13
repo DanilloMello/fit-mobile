@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mobile",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "npx nx run mobile:start"],
+      "port": 8081
+    }
+  ]
+}
