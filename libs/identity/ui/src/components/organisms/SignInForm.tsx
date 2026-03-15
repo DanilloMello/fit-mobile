@@ -145,7 +145,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.surface,
     paddingHorizontal: spacing.xxl,
-    paddingTop: spacing.xxl,
+    paddingVertical: spacing.xxl,
+    justifyContent: 'center',
   },
   heading: {
     alignItems: 'center',
