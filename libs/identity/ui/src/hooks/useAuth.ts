@@ -1,21 +1,14 @@
 import { useState } from 'react';
-import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
 import { authApi } from '@connecthealth/identity/infrastructure';
 import { useAuthStore } from '@connecthealth/identity/application';
-
-WebBrowser.maybeCompleteAuthSession();
+import { useGooglePrompt } from './useGooglePrompt';
 
 export function useAuth() {
   const { user, isAuthenticated, setAuth, clearAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [, , promptAsync] = Google.useAuthRequest({
-    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID,
-    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS,
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB,
-  });
+  const promptAsync = useGooglePrompt();
 
   const signIn = async (email: string, password: string): Promise<void> => {
     setIsLoading(true);
