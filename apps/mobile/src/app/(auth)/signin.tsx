@@ -1,29 +1,24 @@
 import React from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
 
-import { useAuth, SignInForm } from '@connecthealth/identity/ui';
-import { colors } from '@connecthealth/shared/ui';
+import { useAuth, AuthForm } from '@connecthealth/identity/ui';
+import { useThemeColors } from '@connecthealth/shared/ui';
 
 export default function SignInScreen() {
-  const { signIn, isLoading } = useAuth();
+  const { sendMagicLink, isLoading } = useAuth();
+  const colors = useThemeColors();
 
-  const handleSignIn = async (email: string, password: string) => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please fill in all fields');
+  const handleSendMagicLink = async (email: string, name?: string) => {
+    if (!email.trim()) {
+      Alert.alert('Error', 'Please enter your email');
       return;
     }
-    try {
-      await signIn(email.trim(), password);
-      router.replace('/(app)/home');
-    } catch {
-      Alert.alert('Sign In Failed', 'Invalid email or password. Please try again.');
-    }
+    await sendMagicLink(email.trim(), name?.trim());
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.surface }]} edges={['top', 'bottom']}>
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -34,12 +29,11 @@ export default function SignInScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <SignInForm
+          <AuthForm
             isLoading={isLoading}
-            onSignIn={handleSignIn}
-            onSignUp={() => router.push('/(auth)/signup')}
-            onForgotPassword={() => {
-              // TODO: implement forgot password screen
+            onSendMagicLink={handleSendMagicLink}
+            onGoogleSignIn={() => {
+              // TODO: implement Google OAuth
             }}
           />
         </ScrollView>
@@ -51,7 +45,6 @@ export default function SignInScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.surface,
   },
   keyboardView: {
     flex: 1,

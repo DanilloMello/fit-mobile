@@ -16,7 +16,7 @@ Fetch the live gitflow conventions from fit-common using the GitHub MCP:
 mcp__github__get_file_contents:
   owner: DanilloMello
   repo:  fit-common
-  path:  docs/common/GITFLOW.md
+  path:  docs/GITFLOW.md
 ```
 
 Read the full content. **All branching, commit, PR, and merge rules come from this document — follow it exactly.**
