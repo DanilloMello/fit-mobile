@@ -9,18 +9,13 @@ description: Frontend skill for fit-mobile. React Native/NX patterns and convent
 
 ---
 
-## Step 1 — Fetch mobile CODING_GUIDELINES (master index for fit-common)
+## Step 1 — Fetch CODING_GUIDELINES (master index for fit-common)
 
 Always start by fetching this single file — it contains coding standards **and** a doc registry that tells you what other fit-common docs to fetch based on your task:
 
 ```bash
-gh api repos/DanilloMello/fit-common/contents/docs/mobile/CODING_GUIDELINES.md --jq '.content' | base64 -d
+gh api repos/DanilloMello/fit-common/contents/docs/CODING_GUIDELINES.md --jq '.content' | base64 -d
 ```
-
-> If the mobile-specific file doesn't exist yet, fall back to the general one:
-> ```bash
-> gh api repos/DanilloMello/fit-common/contents/docs/CODING_GUIDELINES.md --jq '.content' | base64 -d
-> ```
 
 The doc registry inside it maps tasks to specific docs (DOMAIN_SPEC, API_REGISTRY, SPRINT_PLAN, etc.) with fetch commands. Only load additional docs when the task requires them.
 
