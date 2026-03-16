@@ -70,3 +70,4 @@ coverage/
 # Environment
 .env
 *.env.local
+.claude/worktrees/
