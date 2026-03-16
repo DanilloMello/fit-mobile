@@ -16,6 +16,10 @@ export interface MagicLinkRequest {
   name?: string;
 }
 
+export interface GoogleSignInRequest {
+  idToken: string;
+}
+
 export interface AuthUser {
   id: string;
   name: string;
@@ -60,6 +64,11 @@ export const authApi = {
 
   verifyMagicLink: async (token: string): Promise<AuthResponse> => {
     const response = await apiClient.post<ApiAuthResponse>('/auth/magic-link/verify', { token });
+    return response.data.data;
+  },
+
+  googleSignIn: async (data: GoogleSignInRequest): Promise<AuthResponse> => {
+    const response = await apiClient.post<ApiAuthResponse>('/auth/google', data);
     return response.data.data;
   },
 };

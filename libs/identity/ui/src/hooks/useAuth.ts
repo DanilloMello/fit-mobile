@@ -1,11 +1,20 @@
 import { useState } from 'react';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
 import { authApi } from '@connecthealth/identity/infrastructure';
 import { useAuthStore } from '@connecthealth/identity/application';
+
+WebBrowser.maybeCompleteAuthSession();
 
 export function useAuth() {
   const { user, isAuthenticated, setAuth, clearAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [, , promptAsync] = Google.useAuthRequest({
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID,
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS,
+  });
 
   const signIn = async (email: string, password: string): Promise<void> => {
     setIsLoading(true);
@@ -66,9 +75,27 @@ export function useAuth() {
     }
   };
 
+  const signInWithGoogle = async (): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await promptAsync();
+      if (result.type !== 'success') return;
+      const idToken = result.params.id_token;
+      const { user: authUser, tokens } = await authApi.googleSignIn({ idToken });
+      setAuth(authUser, tokens.accessToken, tokens.refreshToken);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Google sign in failed';
+      setError(message);
+      throw e;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const signOut = (): void => {
     clearAuth();
   };
 
-  return { user, isAuthenticated, isLoading, error, signIn, signUp, sendMagicLink, verifyMagicLink, signOut };
+  return { user, isAuthenticated, isLoading, error, signIn, signUp, sendMagicLink, verifyMagicLink, signInWithGoogle, signOut };
 }
