@@ -1,5 +1,5 @@
-export { colors } from './colors';
-export type { ColorToken } from './colors';
+export { colors, darkColors, lightColors } from './colors';
+export type { ColorToken, ColorPalette } from './colors';
 
 export { typography } from './typography';
 export type { TypographyToken } from './typography';

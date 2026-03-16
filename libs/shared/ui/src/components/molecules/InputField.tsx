@@ -9,10 +9,11 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors } from '../../tokens/colors';
+import { ColorPalette } from '../../tokens/colors';
 import { radii } from '../../tokens/radii';
 import { spacing } from '../../tokens/spacing';
 import { typography } from '../../tokens/typography';
+import { useThemeColors } from '../../hooks/useThemeColors';
 
 export interface InputFieldProps {
   label: string;
@@ -20,6 +21,7 @@ export interface InputFieldProps {
   value: string;
   onChangeText: (text: string) => void;
   placeholder: string;
+  error?: string;
   secureTextEntry?: boolean;
   showSecureToggle?: boolean;
   onToggleSecure?: () => void;
@@ -35,6 +37,7 @@ export function InputField({
   value,
   onChangeText,
   placeholder,
+  error,
   secureTextEntry = false,
   showSecureToggle = false,
   onToggleSecure,
@@ -43,6 +46,9 @@ export function InputField({
   autoCorrect = false,
   accessibilityLabel,
 }: InputFieldProps) {
+  const colors = useThemeColors();
+  const styles = createStyles(colors);
+
   return (
     <View style={styles.container}>
       <View style={styles.labelRow}>
@@ -59,7 +65,7 @@ export function InputField({
         )}
       </View>
 
-      <View style={styles.inputWrapper}>
+      <View style={[styles.inputWrapper, error ? styles.inputWrapperError : undefined]}>
         <TextInput
           style={styles.input}
           value={value}
@@ -89,11 +95,14 @@ export function InputField({
           </TouchableOpacity>
         )}
       </View>
+
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ColorPalette) {
+  return StyleSheet.create({
   container: {
     gap: spacing.xs,
   },
@@ -121,6 +130,14 @@ const styles = StyleSheet.create({
     height: 56,
     paddingHorizontal: spacing.md,
   },
+  inputWrapperError: {
+    borderColor: colors.error,
+  },
+  errorText: {
+    ...typography.caption,
+    color: colors.error,
+    paddingHorizontal: spacing.xxs,
+  },
   input: {
     flex: 1,
     ...typography.inputText,
@@ -132,4 +149,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-});
+  });
+}

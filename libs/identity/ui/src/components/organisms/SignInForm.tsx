@@ -9,11 +9,12 @@ import {
 
 import {
   InputField,
-  colors,
   spacing,
   typography,
   radii,
   shadows,
+  useThemeColors,
+  ColorPalette,
 } from '@connecthealth/shared/ui';
 
 export interface SignInFormProps {
@@ -34,6 +35,9 @@ export function SignInForm({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  const colors = useThemeColors();
+  const styles = createStyles(colors);
 
   const handleSignIn = () => {
     onSignIn(email.trim(), password);
@@ -140,7 +144,8 @@ export function SignInForm({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ColorPalette) {
+  return StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.surface,
@@ -233,4 +238,5 @@ const styles = StyleSheet.create({
     ...typography.link,
     color: colors.textPrimary,
   },
-});
+  });
+}

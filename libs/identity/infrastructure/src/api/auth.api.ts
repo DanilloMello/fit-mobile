@@ -11,6 +11,11 @@ export interface SignUpRequest {
   password: string;
 }
 
+export interface MagicLinkRequest {
+  email: string;
+  name?: string;
+}
+
 export interface AuthUser {
   id: string;
   name: string;
@@ -46,6 +51,15 @@ export const authApi = {
     const response = await apiClient.post<ApiAuthResponse>('/auth/refresh', {
       refreshToken,
     });
+    return response.data.data;
+  },
+
+  sendMagicLink: async (data: MagicLinkRequest): Promise<void> => {
+    await apiClient.post('/auth/magic-link', data);
+  },
+
+  verifyMagicLink: async (token: string): Promise<AuthResponse> => {
+    const response = await apiClient.post<ApiAuthResponse>('/auth/magic-link/verify', { token });
     return response.data.data;
   },
 };

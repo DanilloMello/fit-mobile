@@ -37,9 +37,38 @@ export function useAuth() {
     }
   };
 
+  const sendMagicLink = async (email: string, name?: string): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await authApi.sendMagicLink({ email, name });
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Failed to send magic link';
+      setError(message);
+      throw e;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const verifyMagicLink = async (token: string): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { user: authUser, tokens } = await authApi.verifyMagicLink(token);
+      setAuth(authUser, tokens.accessToken, tokens.refreshToken);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Invalid or expired magic link';
+      setError(message);
+      throw e;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const signOut = (): void => {
     clearAuth();
   };
 
-  return { user, isAuthenticated, isLoading, error, signIn, signUp, signOut };
+  return { user, isAuthenticated, isLoading, error, signIn, signUp, sendMagicLink, verifyMagicLink, signOut };
 }
