@@ -31,6 +31,7 @@ export interface AuthFormProps {
   isLoading: boolean;
   onSendMagicLink: (email: string, name?: string) => Promise<void>;
   onGoogleSignIn?: () => void;
+  googleDisabled?: boolean;
 }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -42,7 +43,7 @@ function validateEmail(value: string): string | undefined {
   return undefined;
 }
 
-export function AuthForm({ isLoading, onSendMagicLink, onGoogleSignIn }: AuthFormProps) {
+export function AuthForm({ isLoading, onSendMagicLink, onGoogleSignIn, googleDisabled }: AuthFormProps) {
   const [mode, setMode] = useState<AuthMode>('signin');
   const [step, setStep] = useState<AuthStep>('form');
   const [email, setEmail] = useState('');
@@ -149,10 +150,12 @@ export function AuthForm({ isLoading, onSendMagicLink, onGoogleSignIn }: AuthFor
 
       {/* Google button */}
       <TouchableOpacity
-        style={styles.googleButton}
+        style={[styles.googleButton, googleDisabled && styles.buttonDisabled]}
         onPress={onGoogleSignIn}
+        disabled={googleDisabled}
         accessibilityRole="button"
         accessibilityLabel="Continue with Google"
+        accessibilityState={{ disabled: googleDisabled }}
       >
         <Ionicons name="logo-google" size={20} color={colors.textPrimary} style={styles.googleIcon} />
         <Text style={styles.googleButtonText}>Continue with Google</Text>
