@@ -2,11 +2,12 @@ import React from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useAuth, AuthForm } from '@connecthealth/identity/ui';
+import { useAuth, useGoogleSignIn, AuthForm } from '@connecthealth/identity/ui';
 import { useThemeColors } from '@connecthealth/shared/ui';
 
 export default function SignInScreen() {
   const { sendMagicLink, isLoading } = useAuth();
+  const { promptAsync, disabled: googleDisabled } = useGoogleSignIn();
   const colors = useThemeColors();
 
   const handleSendMagicLink = async (email: string, name?: string) => {
@@ -32,9 +33,8 @@ export default function SignInScreen() {
           <AuthForm
             isLoading={isLoading}
             onSendMagicLink={handleSendMagicLink}
-            onGoogleSignIn={() => {
-              // TODO: implement Google OAuth
-            }}
+            onGoogleSignIn={() => promptAsync()}
+            googleDisabled={googleDisabled}
           />
         </ScrollView>
       </KeyboardAvoidingView>

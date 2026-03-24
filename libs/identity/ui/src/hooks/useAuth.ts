@@ -66,9 +66,24 @@ export function useAuth() {
     }
   };
 
+  const signInWithGoogle = async (idToken: string): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { user: authUser, tokens } = await authApi.signInWithGoogle({ idToken });
+      setAuth(authUser, tokens.accessToken, tokens.refreshToken);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Failed to sign in with Google';
+      setError(message);
+      throw e;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const signOut = (): void => {
     clearAuth();
   };
 
-  return { user, isAuthenticated, isLoading, error, signIn, signUp, sendMagicLink, verifyMagicLink, signOut };
+  return { user, isAuthenticated, isLoading, error, signIn, signUp, sendMagicLink, verifyMagicLink, signInWithGoogle, signOut };
 }

@@ -1,4 +1,5 @@
 export { useAuth } from './hooks/useAuth';
+export { useGoogleSignIn } from './hooks/useGoogleSignIn';
 
 export { SignInForm } from './components/organisms';
 export type { SignInFormProps } from './components/organisms';
