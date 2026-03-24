@@ -10,12 +10,7 @@
       "android"
     ],
     "plugins": [
-      "expo-font",
-      "@react-native-google-signin/google-signin"
-    ],
-    "android": {
-      "package": "com.connecthealth.fit",
-      "googleServicesFile": "./google-services.json"
-    }
+      "expo-font"
+    ]
   }
 }
