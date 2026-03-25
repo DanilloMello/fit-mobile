@@ -13,7 +13,6 @@ export interface SignUpRequest {
 
 export interface MagicLinkRequest {
   email: string;
-  name?: string;
 }
 
 export interface GoogleSignInRequest {

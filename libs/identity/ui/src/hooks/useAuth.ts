@@ -37,11 +37,11 @@ export function useAuth() {
     }
   };
 
-  const sendMagicLink = async (email: string, name?: string): Promise<void> => {
+  const sendMagicLink = async (email: string): Promise<void> => {
     setIsLoading(true);
     setError(null);
     try {
-      await authApi.sendMagicLink({ email, name });
+      await authApi.sendMagicLink({ email });
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Failed to send magic link';
       setError(message);
