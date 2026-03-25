@@ -10,12 +10,12 @@ export default function SignInScreen() {
   const { promptAsync, disabled: googleDisabled } = useGoogleSignIn();
   const colors = useThemeColors();
 
-  const handleSendMagicLink = async (email: string, name?: string) => {
+  const handleSendMagicLink = async (email: string) => {
     if (!email.trim()) {
       Alert.alert('Error', 'Please enter your email');
       return;
     }
-    await sendMagicLink(email.trim(), name?.trim());
+    await sendMagicLink(email.trim());
   };
 
   return (
