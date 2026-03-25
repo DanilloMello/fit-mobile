@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import {
   ActivityIndicator,
   LayoutAnimation,
-  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
-  UIManager,
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,16 +18,11 @@ import {
   ColorPalette,
 } from '@connecthealth/shared/ui';
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
-
-type AuthMode = 'signin' | 'signup';
 type AuthStep = 'form' | 'sent';
 
 export interface AuthFormProps {
   isLoading: boolean;
-  onSendMagicLink: (email: string, name?: string) => Promise<void>;
+  onSendMagicLink: (email: string) => Promise<void>;
   onGoogleSignIn?: () => void;
   googleDisabled?: boolean;
 }
@@ -44,20 +37,12 @@ function validateEmail(value: string): string | undefined {
 }
 
 export function AuthForm({ isLoading, onSendMagicLink, onGoogleSignIn, googleDisabled }: AuthFormProps) {
-  const [mode, setMode] = useState<AuthMode>('signin');
   const [step, setStep] = useState<AuthStep>('form');
   const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
   const [emailError, setEmailError] = useState<string | undefined>();
 
   const colors = useThemeColors();
   const styles = createStyles(colors);
-
-  const switchMode = (newMode: AuthMode) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setMode(newMode);
-    setEmailError(undefined);
-  };
 
   const handleEmailChange = (text: string) => {
     setEmail(text);
@@ -71,7 +56,7 @@ export function AuthForm({ isLoading, onSendMagicLink, onGoogleSignIn, googleDis
       return;
     }
     try {
-      await onSendMagicLink(email.trim(), mode === 'signup' ? name.trim() : undefined);
+      await onSendMagicLink(email.trim());
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setStep('sent');
     } catch {
@@ -104,7 +89,7 @@ export function AuthForm({ isLoading, onSendMagicLink, onGoogleSignIn, googleDis
 
         <TouchableOpacity
           style={styles.magicLinkButton}
-          onPress={() => onSendMagicLink(email.trim(), mode === 'signup' ? name.trim() : undefined)}
+          onPress={() => onSendMagicLink(email.trim())}
           disabled={isLoading}
           accessibilityRole="button"
           accessibilityLabel="Resend magic link"
@@ -141,11 +126,7 @@ export function AuthForm({ isLoading, onSendMagicLink, onGoogleSignIn, googleDis
           <Text style={styles.brandConnect}>Connect</Text>
           <Text style={styles.brandHealth}>health</Text>
         </Text>
-        <Text style={styles.subtitle}>
-          {mode === 'signin'
-            ? 'Sign in to access your health hub.'
-            : 'Create your account to get started.'}
-        </Text>
+        <Text style={styles.subtitle}>Sign in to access your health hub.</Text>
       </View>
 
       {/* Google button */}
@@ -164,25 +145,12 @@ export function AuthForm({ isLoading, onSendMagicLink, onGoogleSignIn, googleDis
       {/* Divider */}
       <View style={styles.dividerRow}>
         <View style={styles.dividerLine} />
-        <Text style={styles.dividerLabel}>
-          {mode === 'signin' ? 'or continue with email' : 'or sign up with email'}
-        </Text>
+        <Text style={styles.dividerLabel}>or continue with email</Text>
         <View style={styles.dividerLine} />
       </View>
 
       {/* Email form */}
       <View style={styles.form}>
-        {mode === 'signup' && (
-          <InputField
-            label="Name"
-            value={name}
-            onChangeText={setName}
-            placeholder="Enter your name"
-            autoCapitalize="words"
-            accessibilityLabel="Full name"
-          />
-        )}
-
         <InputField
           label="Email"
           value={email}
@@ -211,34 +179,6 @@ export function AuthForm({ isLoading, onSendMagicLink, onGoogleSignIn, googleDis
         </TouchableOpacity>
       </View>
 
-      {/* Footer mode switch */}
-      <View style={styles.footerRow}>
-        {mode === 'signin' ? (
-          <>
-            <Text style={styles.footerText}>New here? </Text>
-            <TouchableOpacity
-              onPress={() => switchMode('signup')}
-              accessibilityRole="button"
-              accessibilityLabel="Go to sign up"
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Text style={styles.footerLink}>Sign up!</Text>
-            </TouchableOpacity>
-          </>
-        ) : (
-          <>
-            <Text style={styles.footerText}>Already have an account? </Text>
-            <TouchableOpacity
-              onPress={() => switchMode('signin')}
-              accessibilityRole="button"
-              accessibilityLabel="Go to sign in"
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Text style={styles.footerLink}>Sign in!</Text>
-            </TouchableOpacity>
-          </>
-        )}
-      </View>
     </View>
   );
 }
@@ -325,13 +265,6 @@ function createStyles(colors: ColorPalette) {
     },
     buttonDisabled: {
       opacity: 0.6,
-    },
-    // Footer
-    footerRow: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginTop: spacing.lg,
     },
     footerText: {
       ...typography.bodySmall,
