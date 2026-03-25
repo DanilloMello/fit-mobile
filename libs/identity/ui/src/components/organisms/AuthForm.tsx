@@ -22,6 +22,7 @@ type AuthStep = 'form' | 'sent';
 
 export interface AuthFormProps {
   isLoading: boolean;
+  error?: string | null;
   onSendMagicLink: (email: string) => Promise<void>;
   onGoogleSignIn?: () => void;
   googleDisabled?: boolean;
@@ -36,7 +37,7 @@ function validateEmail(value: string): string | undefined {
   return undefined;
 }
 
-export function AuthForm({ isLoading, onSendMagicLink, onGoogleSignIn, googleDisabled }: AuthFormProps) {
+export function AuthForm({ isLoading, error, onSendMagicLink, onGoogleSignIn, googleDisabled }: AuthFormProps) {
   const [step, setStep] = useState<AuthStep>('form');
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState<string | undefined>();
@@ -177,6 +178,8 @@ export function AuthForm({ isLoading, onSendMagicLink, onGoogleSignIn, googleDis
             <Text style={styles.magicLinkButtonText}>Send Magic Link</Text>
           )}
         </TouchableOpacity>
+
+        {error && <Text style={styles.errorText}>{error}</Text>}
       </View>
 
     </View>
@@ -265,6 +268,11 @@ function createStyles(colors: ColorPalette) {
     },
     buttonDisabled: {
       opacity: 0.6,
+    },
+    errorText: {
+      ...typography.bodySmall,
+      color: colors.error,
+      textAlign: 'center',
     },
     footerText: {
       ...typography.bodySmall,
