@@ -6,7 +6,7 @@ import { useAuth, useGoogleSignIn, AuthForm } from '@connecthealth/identity/ui';
 import { useThemeColors } from '@connecthealth/shared/ui';
 
 export default function SignInScreen() {
-  const { sendMagicLink, isLoading } = useAuth();
+  const { sendMagicLink, isLoading, error } = useAuth();
   const { promptAsync, disabled: googleDisabled } = useGoogleSignIn();
   const colors = useThemeColors();
 
@@ -32,6 +32,7 @@ export default function SignInScreen() {
         >
           <AuthForm
             isLoading={isLoading}
+            error={error}
             onSendMagicLink={handleSendMagicLink}
             onGoogleSignIn={() => promptAsync()}
             googleDisabled={googleDisabled}
