@@ -30,8 +30,9 @@ function AuthGuard() {
   const segments = useSegments();
 
   const inAuthGroup = segments[0] === '(auth)';
+  const inPublicRoute = segments[0] === 'auth'; // e.g. /auth/magic-link/verify
 
-  if (!isAuthenticated && !inAuthGroup) {
+  if (!isAuthenticated && !inAuthGroup && !inPublicRoute) {
     return <Redirect href="/(auth)/signin" />;
   }
 
