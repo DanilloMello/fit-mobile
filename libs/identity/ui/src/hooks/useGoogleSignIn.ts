@@ -8,15 +8,15 @@ WebBrowser.maybeCompleteAuthSession();
 export function useGoogleSignIn() {
   const { signInWithGoogle, isLoading, error } = useAuth();
 
-  const webClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
+  const webClientId = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB;
   const isConfigured = !!webClientId;
 
   // expo-auth-session throws an invariant if clientId is undefined.
   // Pass a placeholder so the hook mounts safely; isConfigured gates actual use.
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     clientId: webClientId ?? 'not-configured',
-    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
-    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_IOS,
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID,
   });
 
   useEffect(() => {
