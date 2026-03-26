@@ -13,6 +13,7 @@ export interface SignUpRequest {
 
 export interface MagicLinkRequest {
   email: string;
+  redirectUrl?: string;
 }
 
 export interface GoogleSignInRequest {
