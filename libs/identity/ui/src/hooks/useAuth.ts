@@ -41,7 +41,8 @@ export function useAuth() {
     setIsLoading(true);
     setError(null);
     try {
-      await authApi.sendMagicLink({ email });
+      const redirectUrl = process.env.EXPO_PUBLIC_MAGIC_LINK_REDIRECT_URL;
+      await authApi.sendMagicLink({ email, redirectUrl });
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Failed to send magic link';
       setError(message);
