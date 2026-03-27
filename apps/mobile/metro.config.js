@@ -1,6 +1,19 @@
 const { getDefaultConfig } = require('expo/metro-config');
-const { withNxMetro } = require('@nx/expo');
 const path = require('path');
+
+// @nx/expo lives in the workspace root node_modules (devDep of the monorepo).
+// On EAS native builds metro.config.js is not executed, so it is safe to
+// fall back to a no-op when the module cannot be resolved.
+let withNxMetro;
+try {
+  withNxMetro = require(
+    require.resolve('@nx/expo', {
+      paths: [path.resolve(__dirname, '../../node_modules')],
+    })
+  ).withNxMetro;
+} catch {
+  withNxMetro = (cfg) => cfg;
+}
 
 const projectRoot = __dirname;
 const workspaceRoot = path.resolve(projectRoot, '../..');
