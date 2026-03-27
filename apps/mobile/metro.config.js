@@ -79,21 +79,43 @@ const nxConfig = withNxMetro(config, {
   watchFolders: [workspaceRoot],
 });
 
-// Expo SDK 54 + Expo Router 5 requests the entry as a relative path
+// When a dev-client APK (or Expo Go) requests the classic Expo entry
+// (node_modules/expo/AppEntry.bundle), rewrite the URL to expo-router/entry
+// before Metro starts bundling. This happens when the Metro manifest cache
+// is stale or the executor reads the workspace-root package.json (no "main" field).
+nxConfig.server = {
+  ...nxConfig.server,
+  rewriteRequestUrl: (url) => {
+    if (url.includes('node_modules/expo/AppEntry')) {
+      return url.replace(
+        /node_modules\/expo\/AppEntry/g,
+        'node_modules/expo-router/entry'
+      );
+    }
+    return url;
+  },
+};
+
+// Expo Router 6 requests the entry as a relative path
 // (./node_modules/expo-router/entry). withNxMetro overwrites resolveRequest,
 // so we wrap it AFTER to intercept the entry before the NX resolver sees it.
 const nxResolveRequest = nxConfig.resolver.resolveRequest;
 nxConfig.resolver.resolveRequest = (context, moduleName, platform) => {
   if (
     moduleName === 'expo-router/entry' ||
-    moduleName.endsWith('/node_modules/expo-router/entry')
+    moduleName.endsWith('/node_modules/expo-router/entry') ||
+    // Also catch backslash variants on Windows
+    moduleName.endsWith('\\node_modules\\expo-router\\entry')
   ) {
     return {
       type: 'sourceFile',
       filePath: require.resolve('expo-router/entry'),
     };
   }
-  return nxResolveRequest(context, moduleName, platform);
+  if (typeof nxResolveRequest === 'function') {
+    return nxResolveRequest(context, moduleName, platform);
+  }
+  return context.resolveRequest(context, moduleName, platform);
 };
 
 module.exports = nxConfig;
