@@ -12,8 +12,30 @@
   },
   "dependencies": {
     "@connecthealth/source": "file:../..",
+    "@expo-google-fonts/inter": "^0.4.2",
+    "@expo/vector-icons": "^14.0.2",
+    "@tanstack/react-query": "^5.17.0",
+    "axios": "^1.7.0",
+    "expo": "54.0.9",
+    "expo-auth-session": "~6.0.3",
+    "expo-constants": "~17.1.0",
+    "expo-crypto": "~14.1.0",
+    "expo-dev-client": "^55.0.18",
+    "expo-font": "~13.0.4",
+    "expo-linking": "~7.1.0",
+    "expo-router": "~5.0.0",
+    "expo-splash-screen": "31.0.13",
+    "expo-status-bar": "3.0.9",
+    "expo-web-browser": "~14.0.2",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "react-native-web": "^0.21.0"
+    "react-native": "0.81.6",
+    "react-native-gesture-handler": "~2.22.0",
+    "react-native-reanimated": "~3.17.0",
+    "react-native-safe-area-context": "~5.4.0",
+    "react-native-screens": "~4.5.0",
+    "react-native-url-polyfill": "^3.0.0",
+    "react-native-web": "0.21.2",
+    "zustand": "^5.0.0"
   }
 }
