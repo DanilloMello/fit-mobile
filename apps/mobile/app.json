@@ -45,9 +45,9 @@
     "plugins": [
       "expo-router"
     ],
+    "newArchEnabled": true,
     "experiments": {
-      "typedRoutes": true,
-      "newArchEnabled": true
+      "typedRoutes": true
     },
     "extra": {
       "eas": {
