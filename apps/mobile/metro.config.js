@@ -31,6 +31,12 @@ config.resolver.unstable_enablePackageExports = true;
 // Shim every Node built-in that cannot run on Hermes/React Native
 const emptyModule = path.resolve(__dirname, '_empty-module.js');
 config.resolver.extraNodeModules = {
+  // Force a single copy of React/React-Native across all workspace packages.
+  // Without this, zustand (resolved from workspaceRoot/node_modules) picks up
+  // React 19.2.x while the app renderer uses the app-level React 19.1.x,
+  // producing "Invalid hook call" at runtime.
+  react: path.resolve(workspaceRoot, 'node_modules/react'),
+  'react-native': path.resolve(workspaceRoot, 'node_modules/react-native'),
   // real polyfills
   crypto: require.resolve('expo-crypto'),
   url: require.resolve('react-native-url-polyfill'),
