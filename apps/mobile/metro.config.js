@@ -31,12 +31,6 @@ config.resolver.unstable_enablePackageExports = true;
 // Shim every Node built-in that cannot run on Hermes/React Native
 const emptyModule = path.resolve(__dirname, '_empty-module.js');
 config.resolver.extraNodeModules = {
-  // Force a single copy of React/React-Native across all workspace packages.
-  // Without this, zustand (resolved from workspaceRoot/node_modules) picks up
-  // React 19.2.x while the app renderer uses the app-level React 19.1.x,
-  // producing "Invalid hook call" at runtime.
-  react: path.resolve(workspaceRoot, 'node_modules/react'),
-  'react-native': path.resolve(workspaceRoot, 'node_modules/react-native'),
   // real polyfills
   crypto: require.resolve('expo-crypto'),
   url: require.resolve('react-native-url-polyfill'),
@@ -82,9 +76,27 @@ for (const [alias, targets] of Object.entries(tsconfigPaths)) {
   connectHealthAliases[alias] = path.resolve(workspaceRoot, targets[0]);
 }
 
+// Resolve a module relative to a specific root, bypassing Metro's walk-up logic.
+const resolveFrom = (mod) =>
+  require.resolve(mod, { paths: [path.resolve(workspaceRoot, 'node_modules')] });
+
 // Intercept module resolution for expo-router entry and @connecthealth/* libs
 const originalResolveRequest = config.resolver.resolveRequest;
 config.resolver.resolveRequest = (context, moduleName, platform) => {
+  // Force a single copy of React across all packages in the monorepo.
+  // extraNodeModules is only a fallback (skipped when the module is found
+  // locally), so we must intercept here. Zustand lives in workspaceRoot and
+  // resolves react@19.2.x; the renderer links against apps/mobile react@19.1.x —
+  // two instances → "Invalid hook call". Pin every react sub-path to one copy.
+  if (
+    moduleName === 'react' ||
+    moduleName === 'react/jsx-runtime' ||
+    moduleName === 'react/jsx-dev-runtime' ||
+    moduleName === 'react/compiler-runtime'
+  ) {
+    return { type: 'sourceFile', filePath: resolveFrom(moduleName) };
+  }
+
   // When a dev-client APK (or Expo Go) requests the classic Expo entry or the
   // expo-router entry as a relative path, pin it to the installed package file.
   if (
