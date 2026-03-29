@@ -79,8 +79,29 @@ for (const [alias, targets] of Object.entries(tsconfigPaths)) {
 // Intercept module resolution for expo-router entry and @connecthealth/* libs
 const originalResolveRequest = config.resolver.resolveRequest;
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  // When a dev-client APK (or Expo Go) requests the classic Expo entry or the
-  // expo-router entry as a relative path, pin it to the installed package file.
+  
+  // ---> 1. NEW: FORCE SINGLE INSTANCE OF REACT & REACT NATIVE <---
+  const dedupePackages = ['react', 'react-dom', 'react-native'];
+  if (
+    dedupePackages.includes(moduleName) || 
+    moduleName.startsWith('react/') || 
+    moduleName.startsWith('react-dom/') ||
+    moduleName.startsWith('react-native/')
+  ) {
+    // Trick Metro into pretending this import originated from the app's root directory.
+    // This forces it to resolve using projectRoot/node_modules, bypassing any hoisted versions.
+    const modifiedContext = {
+      ...context,
+      originModulePath: path.join(projectRoot, 'index.js'),
+    };
+    
+    if (typeof originalResolveRequest === 'function') {
+      return originalResolveRequest(modifiedContext, moduleName, platform);
+    }
+    return context.resolveRequest(modifiedContext, moduleName, platform);
+  }
+
+  // ---> 2. Existing expo-router entry override <---
   if (
     moduleName === 'expo-router/entry' ||
     moduleName.endsWith('/node_modules/expo-router/entry') ||
@@ -91,13 +112,16 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
       filePath: require.resolve('expo-router/entry'),
     };
   }
-  // Resolve @connecthealth/* monorepo lib aliases
+  
+  // ---> 3. Existing @connecthealth/* monorepo lib aliases <---
   if (connectHealthAliases[moduleName]) {
     return {
       type: 'sourceFile',
       filePath: connectHealthAliases[moduleName],
     };
   }
+  
+  // ---> 4. Standard fallback <---
   if (typeof originalResolveRequest === 'function') {
     return originalResolveRequest(context, moduleName, platform);
   }
