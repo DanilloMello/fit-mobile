@@ -46,6 +46,9 @@
       "expo-router"
     ],
     "newArchEnabled": true,
+    "router": {
+      "root": "src/app"
+    },
     "experiments": {
       "typedRoutes": true
     },
