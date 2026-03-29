@@ -96,6 +96,16 @@ nxConfig.server = {
   },
 };
 
+// Build @connecthealth/* module aliases directly from tsconfig paths so Metro
+// can resolve monorepo libs. withNxMetro should do this automatically but
+// fails in practice on Windows with this NX/Expo version combination.
+const tsconfigPaths = require('./tsconfig.json').compilerOptions.paths;
+const connectHealthAliases = {};
+for (const [alias, targets] of Object.entries(tsconfigPaths)) {
+  // targets[0] is relative to tsconfig baseUrl ("../..") = workspaceRoot
+  connectHealthAliases[alias] = path.resolve(workspaceRoot, targets[0]);
+}
+
 // Expo Router 6 requests the entry as a relative path
 // (./node_modules/expo-router/entry). withNxMetro overwrites resolveRequest,
 // so we wrap it AFTER to intercept the entry before the NX resolver sees it.
@@ -110,6 +120,13 @@ nxConfig.resolver.resolveRequest = (context, moduleName, platform) => {
     return {
       type: 'sourceFile',
       filePath: require.resolve('expo-router/entry'),
+    };
+  }
+  // Resolve @connecthealth/* monorepo lib aliases
+  if (connectHealthAliases[moduleName]) {
+    return {
+      type: 'sourceFile',
+      filePath: connectHealthAliases[moduleName],
     };
   }
   if (typeof nxResolveRequest === 'function') {
