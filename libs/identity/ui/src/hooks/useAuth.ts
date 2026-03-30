@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import * as Linking from 'expo-linking';
 import { authApi } from '@connecthealth/identity/infrastructure';
 import { useAuthStore } from '@connecthealth/identity/application';
 
@@ -26,7 +27,7 @@ export function useAuth() {
     setIsLoading(true);
     setError(null);
     try {
-      const redirectUrl = process.env.EXPO_PUBLIC_MAGIC_LINK_REDIRECT_URL;
+      const redirectUrl = Linking.createURL('/auth/magic-link/verify');
       await authApi.sendMagicLink({ email, redirectUrl });
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Failed to send magic link';
