@@ -69,9 +69,10 @@ npx nx run shared-ui:build-tokens
 ```
 
 **Design-first flow:**
-1. Designer updates tokens in Figma via **Tokens Studio** plugin → exports to `tokens.json`
-2. Dev runs `npm run build:tokens` → regenerates `colors.ts`, `spacing.ts`, `typography.ts`, `radii.ts`, `shadows.ts`
+1. Designer updates tokens in Figma via **Tokens Studio** plugin → pushes to `tokens.json` in the repo
+2. Dev runs `git pull` → `npm run build:tokens` → regenerates `colors.ts`, `spacing.ts`, `typography.ts`, `radii.ts`, `shadows.ts`
 3. Commit both `tokens.json` and the generated `*.ts` files together
+4. Run `/ui-workflow` in Claude Code with a Figma URL to generate components using the up-to-date tokens
 
 > The generated files have an `// auto-generated` header — edit `tokens.json`, not the `.ts` files directly.
 
@@ -129,3 +130,4 @@ npx nx reset          # Clear NX cache
 - Fetch `docs/DOMAIN_SPEC.md` from `fit-common` via `github` MCP for the domain model
 - Fetch `docs/API_REGISTRY.md` from `fit-common` via `github` MCP for API endpoints
 - Run `/fit-mobile-overview` in Claude Code to load architecture and coding patterns
+- Run `/ui-workflow` in Claude Code with a Figma URL to generate components from design
