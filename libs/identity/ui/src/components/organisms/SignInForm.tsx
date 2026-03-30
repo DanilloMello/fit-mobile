@@ -21,7 +21,6 @@ export interface SignInFormProps {
   isLoading: boolean;
   onSignIn: (email: string, password: string) => Promise<void>;
   onForgotPassword?: () => void;
-  onSignUp: () => void;
   onSocialSignIn?: (provider: 'google' | 'apple') => void;
 }
 
@@ -29,7 +28,6 @@ export function SignInForm({
   isLoading,
   onSignIn,
   onForgotPassword,
-  onSignUp,
   onSocialSignIn,
 }: SignInFormProps) {
   const [email, setEmail] = useState('');
@@ -128,18 +126,6 @@ export function SignInForm({
         </TouchableOpacity>
       </View>
 
-      {/* Sign-up link */}
-      <View style={styles.signUpRow}>
-        <Text style={styles.signUpText}>New here? </Text>
-        <TouchableOpacity
-          onPress={onSignUp}
-          accessibilityRole="link"
-          accessibilityLabel="Go to sign up"
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Text style={styles.signUpLink}>Sign up!</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
@@ -222,20 +208,6 @@ function createStyles(colors: ColorPalette) {
   },
   socialButtonText: {
     ...typography.buttonSecondary,
-    color: colors.textPrimary,
-  },
-  signUpRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: spacing.lg,
-  },
-  signUpText: {
-    ...typography.bodySmall,
-    color: colors.textPlaceholder,
-  },
-  signUpLink: {
-    ...typography.link,
     color: colors.textPrimary,
   },
   });

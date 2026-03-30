@@ -5,12 +5,6 @@ export interface SignInRequest {
   password: string;
 }
 
-export interface SignUpRequest {
-  name: string;
-  email: string;
-  password: string;
-}
-
 export interface MagicLinkRequest {
   email: string;
   redirectUrl?: string;
@@ -47,11 +41,6 @@ interface ApiAuthResponse {
 export const authApi = {
   signIn: async (data: SignInRequest): Promise<AuthResponse> => {
     const response = await apiClient.post<ApiAuthResponse>('/auth/login', data);
-    return response.data.data;
-  },
-
-  signUp: async (data: SignUpRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post<ApiAuthResponse>('/auth/register', data);
     return response.data.data;
   },
 
