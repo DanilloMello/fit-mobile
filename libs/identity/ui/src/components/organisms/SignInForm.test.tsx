@@ -6,7 +6,6 @@ describe('SignInForm', () => {
   const defaultProps = {
     isLoading: false,
     onSignIn: jest.fn().mockResolvedValue(undefined),
-    onSignUp: jest.fn(),
   };
 
   beforeEach(() => {
@@ -68,15 +67,6 @@ describe('SignInForm', () => {
   it('does not render "Forgot password?" when onForgotPassword is absent', () => {
     const { queryByRole } = render(<SignInForm {...defaultProps} />);
     expect(queryByRole('button', { name: 'Forgot password?' })).toBeNull();
-  });
-
-  it('calls onSignUp when sign-up link is pressed', () => {
-    const onSignUp = jest.fn();
-    const { getByRole } = render(
-      <SignInForm {...defaultProps} onSignUp={onSignUp} />,
-    );
-    fireEvent.press(getByRole('link', { name: 'Go to sign up' }));
-    expect(onSignUp).toHaveBeenCalledTimes(1);
   });
 
   it('renders Google and Apple social buttons', () => {
