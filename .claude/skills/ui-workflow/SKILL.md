@@ -1,11 +1,11 @@
 ---
 name: ui-workflow
-description: Design-first UI component workflow — Figma design → monorepo implementation.
+description: Design-first UI component workflow for solo dev — Figma Make (free) → MCP Figma → monorepo implementation.
 ---
 
-# UI Component Workflow
+# UI Component Workflow (Solo Dev)
 
-> **Design first.** Every component starts from a Figma design before any code is written.
+> **Design first.** Every component starts from a Figma design. Figma Make is used for visual approval; Claude Code implements directly via MCP Figma.
 
 ---
 
@@ -20,32 +20,46 @@ If the user did **not** provide a Figma component/frame URL, **ask for it before
 
 ---
 
-## Step 1 — Fetch Design System
+## Step 1 — Read Design via MCP Figma
 
-Before touching any component, load the current design system from Figma using the figma MCP:
+Use MCP Figma tools to extract all visual specs from the provided frame:
 
-1. Use `get_figma_data` on the design system page/node to load:
-   - Color tokens
-   - Typography scale
-   - Spacing grid
-   - Existing component variants and naming conventions
-2. Keep these tokens as reference for the entire workflow.
+1. **`get_design_context`** — structure, layout, spacing, colors, typography, border radius, shadows
+2. **`get_variable_defs`** — any Figma Variables defined (may be empty on free tier)
+3. **`get_screenshot`** — visual reference of the frame
 
----
+Extract and note:
+- Colors (hex values) → map to existing project tokens in `libs/shared/ui/src/tokens/`
+- Spacing values → map to project spacing tokens
+- Typography (font, size, weight) → map to project typography tokens
+- Layout (flex direction, alignment, padding, gaps)
+- Variants / states (if any)
 
-## Step 2 — Fetch the Component Design
-
-Use `get_figma_data` with the user-provided URL/node to extract:
-- Visual specs (colors, spacing, typography, border radius, shadows)
-- Variants (states, sizes, themes)
-- Layout structure (flex direction, alignment, padding)
-- Assets that need export (icons, illustrations) via `download_figma_images`
+**No Tokens Studio or Style Dictionary needed** — map Figma values directly to existing project tokens.
 
 ---
 
-## Step 3 — Check Monorepo
+## Step 2 — Map to Project Tokens
 
-Search for an existing implementation before creating anything:
+Compare extracted values against existing tokens:
+
+```
+libs/shared/ui/src/tokens/colors.ts
+libs/shared/ui/src/tokens/spacing.ts
+libs/shared/ui/src/tokens/typography.ts
+```
+
+| Scenario | Action |
+|----------|--------|
+| Value matches an existing token | Use the token |
+| Value is close but not exact | Ask user: use existing token or create new one? |
+| Value is completely new | Create new token in the appropriate file |
+
+---
+
+## Step 3 — Check Monorepo for Existing Components
+
+Search before creating anything:
 
 ```
 libs/shared/ui/src/components/atoms/        ← primitives (Button, Icon, Skeleton)
@@ -55,26 +69,15 @@ libs/{module}/ui/src/components/molecules/  ← domain-specific molecules
 libs/{module}/ui/src/components/organisms/  ← domain-specific organisms
 ```
 
-**If found and matches the design:** return the component's import path. Done.
-
-**If found but outdated:** update the existing component to match the Figma design. Go to Step 5.
-
-**If not found:** continue to Step 4.
-
-```typescript
-// Example result
-import { Button } from '@connecthealth/shared/ui';
-import { ClientCard } from '@connecthealth/client/ui';
-```
+- **Found and matches design:** return the import path. Done.
+- **Found but outdated:** update existing component to match. Go to Step 4.
+- **Not found:** continue to Step 4.
 
 ---
 
-## Step 4 — Create Component in Monorepo
+## Step 4 — Implement Component
 
-### 4a. Check similar components
-Search monorepo for components with overlapping responsibility. If one covers ≥ 80% of the need, extend it instead of creating a new file.
-
-### 4b. Determine atomic level
+### 4a. Determine atomic level
 
 ```
 Single, indivisible element (button, icon, badge, input base)?
@@ -90,26 +93,24 @@ Fetches data and renders a full screen?
   → Screen  (apps/mobile/src/app/(app)/{feature}/index.tsx)
 ```
 
-### 4c. Create the component file
+### 4b. Create the component file
 
-Place at the correct atomic path:
-
-| Level | Path | Rule |
-|-------|------|------|
-| Atom | `libs/shared/ui/src/components/atoms/{Name}.tsx` | Primitive, no business logic. Only in `shared/ui`. |
-| Molecule | `libs/{module}/ui/src/components/molecules/{Name}.tsx` | Composes atoms; may have local UI state. |
-| Organism | `libs/{module}/ui/src/components/organisms/{Name}.tsx` | Composes molecules/atoms; may accept domain props. |
+| Level | Path |
+|-------|------|
+| Atom | `libs/shared/ui/src/components/atoms/{Name}.tsx` |
+| Molecule | `libs/{module}/ui/src/components/molecules/{Name}.tsx` |
+| Organism | `libs/{module}/ui/src/components/organisms/{Name}.tsx` |
 
 Rules:
-- Match the Figma design specs exactly — colors, spacing, typography from design tokens
+- Match the Figma design specs — use project tokens, not hardcoded values
 - Domain libs (`client`, `identity`, `training`) never define atoms — import from `@connecthealth/shared/ui`
 - `StyleSheet.create` only — no inline style objects
 - Use design tokens from `../tokens` (colors, spacing, typography)
 - Add `accessibilityRole`, `accessibilityLabel`, `accessibilityState` to interactive elements
 - Minimum touch target: 44×44pt
-- Create a co-located test file `{Name}.test.tsx` using `@testing-library/react-native`; cover render, user interaction, and accessibility state
+- Create a co-located test file `{Name}.test.tsx` using `@testing-library/react-native`
 
-### 4d. Update monorepo exports
+### 4c. Update monorepo exports
 
 Add the export to the atomic barrel:
 
@@ -122,46 +123,28 @@ Verify the lib-level `index.ts` re-exports the atomic barrel.
 
 ---
 
-## Step 5 — Design vs Design System Audit
+## Step 5 — Token Deviation Check
 
-Before writing any code, compare the fetched component design against the design system tokens loaded in Step 1.
+If the Figma design uses values that don't match any existing token:
 
-### 5a. Spec deviations
-If the component uses colors, spacing, typography, border radius, or shadows that **don't match** the design system:
-
-> The design uses `[value]` for `[property]` but the design system defines `[token]` (`[ds-value]`).
+> The design uses `[value]` for `[property]` but the closest token is `[token]` (`[token-value]`).
 > Should I:
-> - **A) Create a new variant/token** in the design system to match this design?
-> - **B) Stick with the design system** and use `[token]` instead?
+> - **A) Create a new token** to match this design value?
+> - **B) Use the existing token** `[token]` instead?
 
-**Wait for the user's answer before creating anything.**
-
-- If **A**: add the new variant/token to the design system in Figma, then create the component using it.
-- If **B**: implement the component using the existing design system token, ignoring the deviation.
-
-### 5b. New component in design system
-If the Figma file contains a component that **is not yet in the monorepo and was recently added to the design system** (new node, no existing code counterpart), treat it as a net-new component and proceed directly to Step 4 — no user prompt needed.
+Wait for user answer before proceeding.
 
 ---
 
-## Step 6 — Sync Back to Figma
-
-After the component is created or updated in code, check if the design system in Figma needs updating:
-
-- **New variants** added in code that don't exist in Figma → update Figma with the new variants
-- **New component type** that didn't exist → add the component to the Figma design system
-- **New tokens** (color, spacing, etc.) introduced → add them to the Figma design system page
-
-Use figma MCP tools (`get_figma_data`, `download_figma_images`) to verify sync, and inform the user of any manual Figma updates needed (MCP currently supports read-only; write-back may require manual action).
-
----
-
-## Figma MCP Tools Reference
+## MCP Figma Tools Reference
 
 | Tool | When to use |
 |------|-------------|
-| `get_figma_data` | Fetch design specs, component structure, design system tokens |
-| `download_figma_images` | Export icons, illustrations, and assets from Figma frames |
+| `get_design_context` | Layout structure, visual specs, component properties |
+| `get_variable_defs` | Figma Variables (tokens defined in Figma) |
+| `get_screenshot` | Visual reference of the frame |
+| `get_metadata` | File/node metadata |
+| `download_figma_images` | Export icons, illustrations, assets |
 
 ---
 
@@ -169,13 +152,12 @@ Use figma MCP tools (`get_figma_data`, `download_figma_images`) to verify sync, 
 
 - **Design first** — always start from the Figma design, never from imagination
 - **Always ask for the Figma URL** if not provided — do not guess or skip
-- **Always fetch the design system first** — before creating any component
+- **Map to project tokens** — never hardcode color/spacing/typography values
 - **Never create components in `apps/`** — always in `libs/`
 - **Never duplicate** — search monorepo before any creation
-- **Always sync both ways** — monorepo change → Figma update; Figma find → monorepo creation
-- **Always respect the Figma design system** — tokens, naming, variants
+- **No Tokens Studio / Style Dictionary pipeline** — map MCP-extracted values directly to project tokens (see memory `reference_design_workflow_with_designer` for the full pipeline when a designer joins)
 
 ---
 
-**Last Updated:** 2026-03-11
-**Version:** 5.0
+**Last Updated:** 2026-03-15
+**Version:** 6.0

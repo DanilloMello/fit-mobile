@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import * as Linking from 'expo-linking';
 import { authApi } from '@connecthealth/identity/infrastructure';
 import { useAuthStore } from '@connecthealth/identity/application';
 
@@ -7,14 +8,14 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const signIn = async (email: string, password: string): Promise<void> => {
+  const sendMagicLink = async (email: string): Promise<void> => {
     setIsLoading(true);
     setError(null);
     try {
-      const { user: authUser, tokens } = await authApi.signIn({ email, password });
-      setAuth(authUser, tokens.accessToken, tokens.refreshToken);
+      const redirectUrl = Linking.createURL('/auth/magic-link/verify');
+      await authApi.sendMagicLink({ email, redirectUrl });
     } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : 'Failed to sign in';
+      const message = e instanceof Error ? e.message : 'Failed to send link';
       setError(message);
       throw e;
     } finally {
@@ -22,14 +23,29 @@ export function useAuth() {
     }
   };
 
-  const signUp = async (name: string, email: string, password: string): Promise<void> => {
+  const verifyMagicLink = async (token: string): Promise<void> => {
     setIsLoading(true);
     setError(null);
     try {
-      const { user: authUser, tokens } = await authApi.signUp({ name, email, password });
+      const { user: authUser, tokens } = await authApi.verifyMagicLink(token);
       setAuth(authUser, tokens.accessToken, tokens.refreshToken);
     } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : 'Failed to sign up';
+      const message = e instanceof Error ? e.message : 'Invalid or expired link';
+      setError(message);
+      throw e;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const signInWithGoogle = async (idToken: string): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { user: authUser, tokens } = await authApi.signInWithGoogle({ idToken });
+      setAuth(authUser, tokens.accessToken, tokens.refreshToken);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Failed to sign in with Google';
       setError(message);
       throw e;
     } finally {
@@ -41,5 +57,5 @@ export function useAuth() {
     clearAuth();
   };
 
-  return { user, isAuthenticated, isLoading, error, signIn, signUp, signOut };
+  return { user, isAuthenticated, isLoading, error, sendMagicLink, verifyMagicLink, signInWithGoogle, signOut };
 }

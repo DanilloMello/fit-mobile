@@ -1,136 +1,59 @@
-import React, { useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { router } from 'expo-router';
-import { useAuth } from '@connecthealth/identity/ui';
+import React from 'react';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { useAuth, useGoogleSignIn, AuthForm } from '@connecthealth/identity/ui';
+import { useThemeColors } from '@connecthealth/shared/ui';
 
 export default function SignInScreen() {
-  const { signIn, isLoading } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { sendMagicLink, isLoading, error } = useAuth();
+  const { promptAsync, disabled: googleDisabled } = useGoogleSignIn();
+  const colors = useThemeColors();
 
-  const handleSignIn = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please fill in all fields');
+  const handleSendMagicLink = async (email: string) => {
+    if (!email.trim()) {
+      Alert.alert('Error', 'Please enter your email');
       return;
     }
-    try {
-      await signIn(email.trim(), password);
-      router.replace('/(app)/home');
-    } catch {
-      Alert.alert('Sign In Failed', 'Invalid email or password. Please try again.');
-    }
+    await sendMagicLink(email.trim());
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome back</Text>
-      <Text style={styles.subtitle}>Sign in to your account</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoCorrect={false}
-        accessibilityLabel="Email input"
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        accessibilityLabel="Password input"
-      />
-
-      <TouchableOpacity
-        style={[styles.button, isLoading && styles.buttonDisabled]}
-        onPress={handleSignIn}
-        disabled={isLoading}
-        accessibilityLabel="Sign in button"
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.surface }]} edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        {isLoading ? (
-          <ActivityIndicator color="#FFFFFF" />
-        ) : (
-          <Text style={styles.buttonText}>Sign In</Text>
-        )}
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        onPress={() => router.push('/(auth)/signup')}
-        accessibilityLabel="Go to sign up"
-      >
-        <Text style={styles.link}>
-          Don&apos;t have an account?{' '}
-          <Text style={styles.linkBold}>Sign Up</Text>
-        </Text>
-      </TouchableOpacity>
-    </View>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <AuthForm
+            isLoading={isLoading}
+            error={error}
+            onSendMagicLink={handleSendMagicLink}
+            onGoogleSignIn={() => promptAsync()}
+            googleDisabled={googleDisabled}
+          />
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    justifyContent: 'center',
-    padding: 24,
-    backgroundColor: '#FFFFFF',
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1F2937',
-    marginBottom: 8,
+  keyboardView: {
+    flex: 1,
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#6B7280',
-    marginBottom: 32,
+  scroll: {
+    flex: 1,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: '#1F2937',
-    backgroundColor: '#F9FAFB',
-    marginBottom: 16,
-  },
-  button: {
-    backgroundColor: '#4F46E5',
-    borderRadius: 8,
-    padding: 14,
-    alignItems: 'center',
-    marginBottom: 16,
-    marginTop: 8,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  link: {
-    textAlign: 'center',
-    color: '#6B7280',
-    fontSize: 14,
-  },
-  linkBold: {
-    color: '#4F46E5',
-    fontWeight: '600',
+  scrollContent: {
+    flexGrow: 1,
   },
 });

@@ -1,7 +1,11 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { spacing, typography, useThemeColors, ColorPalette } from '@connecthealth/shared/ui';
 
 export default function ProfileScreen() {
+  const colors = useThemeColors();
+  const styles = createStyles(colors);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Profile</Text>
@@ -15,27 +19,28 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    padding: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1F2937',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#4B5563',
-    marginBottom: 4,
-  },
-  placeholder: {
-    fontSize: 14,
-    color: '#9CA3AF',
-  },
-});
+function createStyles(colors: ColorPalette) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.background,
+      padding: spacing.lg,
+    },
+    title: {
+      ...typography.display,
+      color: colors.textPrimary,
+      marginBottom: spacing.xs,
+    },
+    subtitle: {
+      ...typography.body,
+      color: colors.textSecondary,
+      marginBottom: spacing.xxs,
+    },
+    placeholder: {
+      ...typography.bodySmall,
+      color: colors.textMuted,
+    },
+  });
+}

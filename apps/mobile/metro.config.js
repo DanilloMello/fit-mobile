@@ -1,12 +1,19 @@
 const { getDefaultConfig } = require('expo/metro-config');
-const { withNxMetro } = require('@nx/expo');
 const path = require('path');
 
 const projectRoot = __dirname;
 const workspaceRoot = path.resolve(projectRoot, '../..');
 
+// Tell expo-router exactly where the app routes live.
+// Without this, withNxMetro corrupting projectRoot causes route discovery to fail.
+process.env.EXPO_ROUTER_APP_ROOT = path.join(projectRoot, 'src/app');
+
+// SDK 52+ expo/metro-config handles monorepo detection automatically.
+// We do NOT use withNxMetro — it overwrites projectRoot and breaks expo-router's
+// route discovery in this NX + Expo SDK 54 + Windows combination.
 const config = getDefaultConfig(projectRoot);
 
+// Monorepo: watch all workspace libs and resolve node_modules from both roots
 config.watchFolders = [workspaceRoot];
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
@@ -60,27 +67,80 @@ config.resolver.extraNodeModules = {
   punycode: emptyModule,
 };
 
-const nxConfig = withNxMetro(config, {
-  debug: false,
-  extensions: ['ts', 'tsx', 'js', 'jsx'],
-  watchFolders: [workspaceRoot],
-});
+// Build @connecthealth/* module aliases directly from tsconfig paths so Metro
+// can resolve monorepo libs without relying on withNxMetro's broken path mapping.
+const tsconfigPaths = require('./tsconfig.json').compilerOptions.paths;
+const connectHealthAliases = {};
+for (const [alias, targets] of Object.entries(tsconfigPaths)) {
+  // targets[0] is relative to tsconfig baseUrl ("../..") = workspaceRoot
+  connectHealthAliases[alias] = path.resolve(workspaceRoot, targets[0]);
+}
 
-// Expo SDK 54 + Expo Router 5 requests the entry as a relative path
-// (./node_modules/expo-router/entry). withNxMetro overwrites resolveRequest,
-// so we wrap it AFTER to intercept the entry before the NX resolver sees it.
-const nxResolveRequest = nxConfig.resolver.resolveRequest;
-nxConfig.resolver.resolveRequest = (context, moduleName, platform) => {
+// Intercept module resolution for expo-router entry and @connecthealth/* libs
+const originalResolveRequest = config.resolver.resolveRequest;
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  
+  // ---> 1. NEW: FORCE SINGLE INSTANCE OF REACT & REACT NATIVE <---
+  const dedupePackages = ['react', 'react-dom', 'react-native'];
+  if (
+    dedupePackages.includes(moduleName) || 
+    moduleName.startsWith('react/') || 
+    moduleName.startsWith('react-dom/') ||
+    moduleName.startsWith('react-native/')
+  ) {
+    // Trick Metro into pretending this import originated from the app's root directory.
+    // This forces it to resolve using projectRoot/node_modules, bypassing any hoisted versions.
+    const modifiedContext = {
+      ...context,
+      originModulePath: path.join(projectRoot, 'index.js'),
+    };
+    
+    if (typeof originalResolveRequest === 'function') {
+      return originalResolveRequest(modifiedContext, moduleName, platform);
+    }
+    return context.resolveRequest(modifiedContext, moduleName, platform);
+  }
+
+  // ---> 2. Existing expo-router entry override <---
   if (
     moduleName === 'expo-router/entry' ||
-    moduleName.endsWith('/node_modules/expo-router/entry')
+    moduleName.endsWith('/node_modules/expo-router/entry') ||
+    moduleName.endsWith('\\node_modules\\expo-router\\entry')
   ) {
     return {
       type: 'sourceFile',
       filePath: require.resolve('expo-router/entry'),
     };
   }
-  return nxResolveRequest(context, moduleName, platform);
+  
+  // ---> 3. Existing @connecthealth/* monorepo lib aliases <---
+  if (connectHealthAliases[moduleName]) {
+    return {
+      type: 'sourceFile',
+      filePath: connectHealthAliases[moduleName],
+    };
+  }
+  
+  // ---> 4. Standard fallback <---
+  if (typeof originalResolveRequest === 'function') {
+    return originalResolveRequest(context, moduleName, platform);
+  }
+  return context.resolveRequest(context, moduleName, platform);
 };
 
-module.exports = nxConfig;
+// When a dev-client APK (or Expo Go) requests the classic Expo entry bundle URL,
+// rewrite it to expo-router/entry before Metro starts bundling.
+config.server = {
+  ...config.server,
+  rewriteRequestUrl: (url) => {
+    if (url.includes('node_modules/expo/AppEntry')) {
+      return url.replace(
+        /node_modules\/expo\/AppEntry/g,
+        'node_modules/expo-router/entry'
+      );
+    }
+    return url;
+  },
+};
+
+module.exports = config;

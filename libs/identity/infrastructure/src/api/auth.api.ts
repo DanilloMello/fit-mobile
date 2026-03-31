@@ -1,19 +1,21 @@
 import { apiClient } from '@connecthealth/shared/utils';
 
-export interface SignInRequest {
+export interface MagicLinkRequest {
   email: string;
-  password: string;
+  redirectUrl?: string;
 }
 
-export interface SignUpRequest {
-  name: string;
-  email: string;
-  password: string;
+export interface GoogleSignInRequest {
+  idToken: string;
 }
 
 export interface AuthUser {
   id: string;
   name: string;
+  email: string;
+  phone: string | null;
+  photoUrl: string | null;
+  createdAt: string;
 }
 
 export interface AuthTokens {
@@ -32,20 +34,24 @@ interface ApiAuthResponse {
 }
 
 export const authApi = {
-  signIn: async (data: SignInRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post<ApiAuthResponse>('/auth/login', data);
-    return response.data.data;
-  },
-
-  signUp: async (data: SignUpRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post<ApiAuthResponse>('/auth/register', data);
-    return response.data.data;
-  },
-
   refreshToken: async (refreshToken: string): Promise<AuthResponse> => {
     const response = await apiClient.post<ApiAuthResponse>('/auth/refresh', {
       refreshToken,
     });
+    return response.data.data;
+  },
+
+  sendMagicLink: async (data: MagicLinkRequest): Promise<void> => {
+    await apiClient.post('/auth/magic-link', data);
+  },
+
+  verifyMagicLink: async (token: string): Promise<AuthResponse> => {
+    const response = await apiClient.post<ApiAuthResponse>('/auth/magic-link/verify', { token });
+    return response.data.data;
+  },
+
+  signInWithGoogle: async (data: GoogleSignInRequest): Promise<AuthResponse> => {
+    const response = await apiClient.post<ApiAuthResponse>('/auth/google', data);
     return response.data.data;
   },
 };

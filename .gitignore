@@ -62,11 +62,9 @@ coverage/
 *.tsbuildinfo
 
 # Claude
-.claude/docs
-.claude/docs.backup
-.claude/settings.local.json
-.mcp.json
+.claude/
 
 # Environment
 .env
 *.env.local
+.env.example

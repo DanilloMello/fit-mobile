@@ -57,15 +57,34 @@ npx nx run mobile:android
 npx nx test
 ```
 
+## Design System Tokens
+
+Design tokens live in `libs/shared/ui/src/tokens/tokens.json` (Tokens Studio format).
+After updating tokens via the Figma plugin, regenerate the TypeScript constants:
+
+```bash
+npm run build:tokens
+# or
+npx nx run shared-ui:build-tokens
+```
+
+**Design-first flow:**
+1. Designer updates tokens in Figma via **Tokens Studio** plugin → pushes to `tokens.json` in the repo
+2. Dev runs `git pull` → `npm run build:tokens` → regenerates `colors.ts`, `spacing.ts`, `typography.ts`, `radii.ts`, `shadows.ts`
+3. Commit both `tokens.json` and the generated `*.ts` files together
+4. Run `/ui-workflow` in Claude Code with a Figma URL to generate components using the up-to-date tokens
+
+> The generated files have an `// auto-generated` header — edit `tokens.json`, not the `.ts` files directly.
+
 ## MCP Setup
 
-The `.claude/mcp.json` is already configured. When you open this project in Claude Code, it automatically connects to fit-common docs via MCP servers. No manual setup needed.
+MCP servers are configured via Claude Code. Three servers are used:
 
-Available MCP servers:
-- `fit-mobile-docs` — shared docs (DOMAIN_SPEC, API_REGISTRY, etc.)
-- `fit-mobile-skills` — React Native/NX patterns
-- `fit-mobile-scripts` — automation scripts
-- `fit-mobile-hooks` — git hook templates
+| Server | Purpose |
+|--------|---------|
+| `github` | Reads shared docs from `DanilloMello/fit-common` (DOMAIN_SPEC, API_REGISTRY, CODING_GUIDELINES, etc.) |
+| `context7` | Library docs and code examples for any package in the stack |
+| `figma` | Design assets and component specs |
 
 ## Working with Shared Documentation
 
@@ -78,8 +97,6 @@ git add docs/API_REGISTRY.md
 git commit -m "docs: update API registry"
 git push
 ```
-
-No submodule sync needed — MCP reads directly from fit-common.
 
 ## Daily Workflow
 
@@ -94,13 +111,6 @@ git push                    # Pre-push hook validates automatically
 
 ### Pre-push hook fails
 Fix the errors shown by the hook, then push again.
-
-### MCP not connecting
-Verify fit-common is cloned as a sibling directory:
-```bash
-ls ../fit-common/docs/
-# Should list: API_REGISTRY.md, DOMAIN_SPEC.md, etc.
-```
 
 ### node_modules issues
 ```bash
@@ -117,6 +127,7 @@ npx nx reset          # Clear NX cache
 ## Next Steps
 
 - Read `CLAUDE.md` for project overview
-- Use `fit-mobile-docs` MCP to read `DOMAIN_SPEC.md` for the domain model
-- Use `fit-mobile-docs` MCP to read `API_REGISTRY.md` for API endpoints to consume
-- Read `.claude/skills/fit-mobile/SKILL.md` for React Native/NX patterns
+- Fetch `docs/DOMAIN_SPEC.md` from `fit-common` via `github` MCP for the domain model
+- Fetch `docs/API_REGISTRY.md` from `fit-common` via `github` MCP for API endpoints
+- Run `/fit-mobile-overview` in Claude Code to load architecture and coding patterns
+- Run `/ui-workflow` in Claude Code with a Figma URL to generate components from design
