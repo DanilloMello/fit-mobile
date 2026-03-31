@@ -1,10 +1,5 @@
 import { apiClient } from '@connecthealth/shared/utils';
 
-export interface SignInRequest {
-  email: string;
-  password: string;
-}
-
 export interface MagicLinkRequest {
   email: string;
   redirectUrl?: string;
@@ -39,11 +34,6 @@ interface ApiAuthResponse {
 }
 
 export const authApi = {
-  signIn: async (data: SignInRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post<ApiAuthResponse>('/auth/login', data);
-    return response.data.data;
-  },
-
   refreshToken: async (refreshToken: string): Promise<AuthResponse> => {
     const response = await apiClient.post<ApiAuthResponse>('/auth/refresh', {
       refreshToken,

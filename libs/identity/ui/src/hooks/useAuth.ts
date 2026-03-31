@@ -8,21 +8,6 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const signIn = async (email: string, password: string): Promise<void> => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const { user: authUser, tokens } = await authApi.signIn({ email, password });
-      setAuth(authUser, tokens.accessToken, tokens.refreshToken);
-    } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : 'Failed to sign in';
-      setError(message);
-      throw e;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const sendMagicLink = async (email: string): Promise<void> => {
     setIsLoading(true);
     setError(null);
@@ -72,5 +57,5 @@ export function useAuth() {
     clearAuth();
   };
 
-  return { user, isAuthenticated, isLoading, error, signIn, sendMagicLink, verifyMagicLink, signInWithGoogle, signOut };
+  return { user, isAuthenticated, isLoading, error, sendMagicLink, verifyMagicLink, signInWithGoogle, signOut };
 }
