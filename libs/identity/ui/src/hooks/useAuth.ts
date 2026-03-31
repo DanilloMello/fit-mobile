@@ -15,7 +15,7 @@ export function useAuth() {
       const redirectUrl = Linking.createURL('/auth/magic-link/verify');
       await authApi.sendMagicLink({ email, redirectUrl });
     } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : 'Failed to send magic link';
+      const message = e instanceof Error ? e.message : 'Failed to send link';
       setError(message);
       throw e;
     } finally {
@@ -30,7 +30,7 @@ export function useAuth() {
       const { user: authUser, tokens } = await authApi.verifyMagicLink(token);
       setAuth(authUser, tokens.accessToken, tokens.refreshToken);
     } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : 'Invalid or expired magic link';
+      const message = e instanceof Error ? e.message : 'Invalid or expired link';
       setError(message);
       throw e;
     } finally {

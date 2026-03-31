@@ -78,7 +78,7 @@ export function AuthForm({ isLoading, error, onSendMagicLink, onGoogleSignIn, go
         </View>
 
         <View style={styles.sentCard}>
-          <Text style={styles.sentTitle}>Magic link sent!</Text>
+          <Text style={styles.sentTitle}>Link sent!</Text>
           <Text style={styles.sentBody}>
             We sent a link to{'\n'}
             <Text style={styles.sentEmail}>{email}</Text>
@@ -93,7 +93,7 @@ export function AuthForm({ isLoading, error, onSendMagicLink, onGoogleSignIn, go
           onPress={() => onSendMagicLink(email.trim())}
           disabled={isLoading}
           accessibilityRole="button"
-          accessibilityLabel="Resend magic link"
+          accessibilityLabel="Resend link"
           accessibilityState={{ busy: isLoading }}
         >
           {isLoading ? (
@@ -169,13 +169,13 @@ export function AuthForm({ isLoading, error, onSendMagicLink, onGoogleSignIn, go
           onPress={handleSubmit}
           disabled={isLoading}
           accessibilityRole="button"
-          accessibilityLabel="Send Magic Link"
+          accessibilityLabel="Send Link"
           accessibilityState={{ disabled: isLoading, busy: isLoading }}
         >
           {isLoading ? (
             <ActivityIndicator color={colors.textSecondary} />
           ) : (
-            <Text style={styles.magicLinkButtonText}>Send Magic Link</Text>
+            <Text style={styles.magicLinkButtonText}>Send Link</Text>
           )}
         </TouchableOpacity>
 
