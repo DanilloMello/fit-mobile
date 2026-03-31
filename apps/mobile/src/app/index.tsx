@@ -1,6 +1,10 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from 'react-native';
+import { spacing, typography, useThemeColors, ColorPalette } from '@connecthealth/shared/ui';
 
 export default function Page() {
+  const colors = useThemeColors();
+  const styles = createStyles(colors);
+
   return (
     <View style={styles.container}>
       <View style={styles.main}>
@@ -11,24 +15,28 @@ export default function Page() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    padding: 24,
-  },
-  main: {
-    flex: 1,
-    justifyContent: "center",
-    maxWidth: 960,
-    marginHorizontal: "auto",
-  },
-  title: {
-    fontSize: 64,
-    fontWeight: "bold",
-  },
-  subtitle: {
-    fontSize: 36,
-    color: "#38434D",
-  },
-});
+function createStyles(colors: ColorPalette) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      padding: spacing.xl,
+    },
+    main: {
+      flex: 1,
+      justifyContent: 'center',
+      maxWidth: 960,
+      marginHorizontal: 'auto',
+    },
+    title: {
+      ...typography.display,
+      fontSize: 64,
+      color: colors.textPrimary,
+    },
+    subtitle: {
+      ...typography.body,
+      fontSize: 36,
+      color: colors.textMuted,
+    },
+  });
+}
