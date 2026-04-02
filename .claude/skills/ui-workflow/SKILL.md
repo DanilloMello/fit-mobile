@@ -1,47 +1,48 @@
 ---
 name: ui-workflow
-description: Design-first UI component workflow for solo dev — Figma Make (free) → MCP Figma → monorepo implementation.
+description: Design-first UI component workflow for solo dev — Claude Visualizer (HTML/SVG) → token mapping → monorepo implementation.
 ---
 
 # UI Component Workflow (Solo Dev)
 
-> **Design first.** Every component starts from a Figma design. Figma Make is used for visual approval; Claude Code implements directly via MCP Figma.
+> **Visual approval first.** Every component starts with a Claude-rendered HTML/SVG mock. No Figma, no external tools — mock and implementation happen in the same session.
 
 ---
 
-## Step 0 — Get the Figma URL
+## Step 1 — Describe the Component
 
-If the user did **not** provide a Figma component/frame URL, **ask for it before proceeding**:
+If the user did not describe the component clearly, ask:
 
-> Which Figma frame or component should I use as reference?
-> Paste the URL (e.g. `https://www.figma.com/design/…?node-id=…`).
+> What should this component do and look like?
+> Include: content (text, icons, images), states (default, pressed, disabled, empty), layout hints.
 
-**Do not proceed until you have a valid Figma URL.**
-
----
-
-## Step 1 — Read Design via MCP Figma
-
-Use MCP Figma tools to extract all visual specs from the provided frame:
-
-1. **`get_design_context`** — structure, layout, spacing, colors, typography, border radius, shadows
-2. **`get_variable_defs`** — any Figma Variables defined (may be empty on free tier)
-3. **`get_screenshot`** — visual reference of the frame
-
-Extract and note:
-- Colors (hex values) → map to existing project tokens in `libs/shared/ui/src/tokens/`
-- Spacing values → map to project spacing tokens
-- Typography (font, size, weight) → map to project typography tokens
-- Layout (flex direction, alignment, padding, gaps)
-- Variants / states (if any)
-
-**No Tokens Studio or Style Dictionary needed** — map Figma values directly to existing project tokens.
+With a clear description, **generate the mock immediately — do not ask for a Figma URL**.
 
 ---
 
-## Step 2 — Map to Project Tokens
+## Step 2 — Generate HTML/SVG Mock (Visualizer)
 
-Compare extracted values against existing tokens:
+Use the Claude built-in visualizer to render an HTML/SVG mockup in the conversation.
+
+Requirements for the mock:
+- Use **freeform px/hex values** — visual accuracy matters here, tokens come later
+- Show **all relevant states** (default, pressed/active, disabled, loading, empty) as separate frames
+- Include realistic content (labels, icons, data)
+- Match mobile proportions (375px wide reference frame)
+
+Present the mock and ask:
+
+> Here's the visual mock. Does this match what you had in mind?
+> - Approve → I'll map to tokens and implement
+> - Change [X] → I'll update the mock first
+
+**Do not proceed to Step 3 until the mock is approved.**
+
+---
+
+## Step 3 — Map Mock Values to Project Tokens
+
+Read the current token files before mapping:
 
 ```
 libs/shared/ui/src/tokens/colors.ts
@@ -49,15 +50,22 @@ libs/shared/ui/src/tokens/spacing.ts
 libs/shared/ui/src/tokens/typography.ts
 ```
 
+For every visual value used in the mock:
+
 | Scenario | Action |
 |----------|--------|
-| Value matches an existing token | Use the token |
-| Value is close but not exact | Ask user: use existing token or create new one? |
-| Value is completely new | Create new token in the appropriate file |
+| Mock value matches an existing token | Use the token |
+| Mock value is close but not exact | Ask user: use existing token or create new one? |
+| Mock value is completely new | Create new token in the appropriate file |
+
+> The mock uses `#1A73E8` for the primary button but the closest token is `colors.brand.primary` (`#1B72E8`).
+> A) Use `colors.brand.primary`  B) Create a new token?
+
+Wait for user answer before proceeding.
 
 ---
 
-## Step 3 — Check Monorepo for Existing Components
+## Step 4 — Check Monorepo for Existing Components
 
 Search before creating anything:
 
@@ -69,15 +77,15 @@ libs/{module}/ui/src/components/molecules/  ← domain-specific molecules
 libs/{module}/ui/src/components/organisms/  ← domain-specific organisms
 ```
 
-- **Found and matches design:** return the import path. Done.
-- **Found but outdated:** update existing component to match. Go to Step 4.
-- **Not found:** continue to Step 4.
+- **Found and matches approved mock:** return the import path. Done.
+- **Found but outdated:** update existing component to match. Go to Step 5.
+- **Not found:** continue to Step 5.
 
 ---
 
-## Step 4 — Implement Component
+## Step 5 — Implement Component
 
-### 4a. Determine atomic level
+### 5a. Determine atomic level
 
 ```
 Single, indivisible element (button, icon, badge, input base)?
@@ -93,7 +101,7 @@ Fetches data and renders a full screen?
   → Screen  (apps/mobile/src/app/(app)/{feature}/index.tsx)
 ```
 
-### 4b. Create the component file
+### 5b. Create the component file
 
 | Level | Path |
 |-------|------|
@@ -102,7 +110,7 @@ Fetches data and renders a full screen?
 | Organism | `libs/{module}/ui/src/components/organisms/{Name}.tsx` |
 
 Rules:
-- Match the Figma design specs — use project tokens, not hardcoded values
+- Implement exactly what was approved in the mock — use project tokens, never hardcode values
 - Domain libs (`client`, `identity`, `training`) never define atoms — import from `@connecthealth/shared/ui`
 - `StyleSheet.create` only — no inline style objects
 - Use design tokens from `../tokens` (colors, spacing, typography)
@@ -110,9 +118,7 @@ Rules:
 - Minimum touch target: 44×44pt
 - Create a co-located test file `{Name}.test.tsx` using `@testing-library/react-native`
 
-### 4c. Update monorepo exports
-
-Add the export to the atomic barrel:
+### 5c. Update monorepo exports
 
 ```typescript
 // libs/{module}/ui/src/components/{atoms|molecules|organisms}/index.ts
@@ -123,41 +129,16 @@ Verify the lib-level `index.ts` re-exports the atomic barrel.
 
 ---
 
-## Step 5 — Token Deviation Check
-
-If the Figma design uses values that don't match any existing token:
-
-> The design uses `[value]` for `[property]` but the closest token is `[token]` (`[token-value]`).
-> Should I:
-> - **A) Create a new token** to match this design value?
-> - **B) Use the existing token** `[token]` instead?
-
-Wait for user answer before proceeding.
-
----
-
-## MCP Figma Tools Reference
-
-| Tool | When to use |
-|------|-------------|
-| `get_design_context` | Layout structure, visual specs, component properties |
-| `get_variable_defs` | Figma Variables (tokens defined in Figma) |
-| `get_screenshot` | Visual reference of the frame |
-| `get_metadata` | File/node metadata |
-| `download_figma_images` | Export icons, illustrations, assets |
-
----
-
 ## Rules
 
-- **Design first** — always start from the Figma design, never from imagination
-- **Always ask for the Figma URL** if not provided — do not guess or skip
-- **Map to project tokens** — never hardcode color/spacing/typography values
+- **Visual approval first** — always generate and approve the HTML/SVG mock before coding
+- **Never skip the mock** — even for "simple" components; the mock catches misalignments early
+- **Map to project tokens** — never hardcode color/spacing/typography in the final component
 - **Never create components in `apps/`** — always in `libs/`
 - **Never duplicate** — search monorepo before any creation
-- **No Tokens Studio / Style Dictionary pipeline** — map MCP-extracted values directly to project tokens (see memory `reference_design_workflow_with_designer` for the full pipeline when a designer joins)
+- **No MCP Figma calls** — this workflow is Figma-free by design
 
 ---
 
-**Last Updated:** 2026-03-15
-**Version:** 6.0
+**Last Updated:** 2026-04-02
+**Version:** 7.0
