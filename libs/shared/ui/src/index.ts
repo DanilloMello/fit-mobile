@@ -1,7 +1,16 @@
 export { LoadingSpinner } from './components/LoadingSpinner';
 
-export { InputField } from './components/molecules';
-export type { InputFieldProps } from './components/molecules';
+export {
+  InputField,
+  SegmentedControl,
+  FAB,
+  StatusDot,
+} from './components/molecules';
+export type {
+  InputFieldProps,
+  SegmentedControlOption,
+  StatusDotVariant,
+} from './components/molecules';
 
 export { useThemeColors } from './hooks/useThemeColors';
 

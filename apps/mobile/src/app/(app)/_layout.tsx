@@ -1,7 +1,23 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+
 import { useThemeColors } from '@connecthealth/shared/ui';
+
+type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
+
+function TabIcon({
+  name,
+  color,
+  size,
+}: {
+  name: IoniconsName;
+  color: string;
+  size: number;
+}) {
+  return <Ionicons name={name} size={size} color={color} />;
+}
 
 export default function AppLayout() {
   const colors = useThemeColors();
@@ -14,11 +30,12 @@ export default function AppLayout() {
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
+          height: Platform.select({ ios: 80, android: 60 }),
+          paddingBottom: Platform.select({ ios: 20, android: 8 }),
         },
-        headerStyle: {
-          backgroundColor: colors.surface,
-        },
+        headerStyle: { backgroundColor: colors.surface },
         headerTintColor: colors.textPrimary,
+        headerShown: false,
       }}
     >
       <Tabs.Screen
@@ -26,25 +43,25 @@ export default function AppLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
+            <TabIcon name="home-outline" color={color} size={size} />
           ),
         }}
       />
       <Tabs.Screen
-        name="clients/index"
+        name="financial/index"
         options={{
-          title: 'Clients',
+          title: 'Financial',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people-outline" size={size} color={color} />
+            <TabIcon name="wallet-outline" color={color} size={size} />
           ),
         }}
       />
       <Tabs.Screen
-        name="plans/index"
+        name="library/index"
         options={{
-          title: 'Plans',
+          title: 'Library',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="barbell-outline" size={size} color={color} />
+            <TabIcon name="barbell-outline" color={color} size={size} />
           ),
         }}
       />
@@ -53,9 +70,17 @@ export default function AppLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
+            <TabIcon name="person-outline" color={color} size={size} />
           ),
         }}
+      />
+      {/* Non-tab screens — navigable but hidden from tab bar */}
+      <Tabs.Screen name="clients/index" options={{ href: null }} />
+      <Tabs.Screen name="plans/index" options={{ href: null }} />
+      <Tabs.Screen name="plans/[id]" options={{ href: null, headerShown: true }} />
+      <Tabs.Screen
+        name="plans/[id]/workout-day/[dayId]"
+        options={{ href: null, headerShown: true }}
       />
     </Tabs>
   );
