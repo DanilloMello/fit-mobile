@@ -32,6 +32,7 @@
       "@connecthealth/client/infrastructure": ["libs/client/infrastructure/src/index.ts"],
       "@connecthealth/client/ui": ["libs/client/ui/src/index.ts"],
       "@connecthealth/training/domain": ["libs/training/domain/src/index.ts"],
+      "@connecthealth/training/application": ["libs/training/application/src/index.ts"],
       "@connecthealth/training/infrastructure": ["libs/training/infrastructure/src/index.ts"],
       "@connecthealth/training/ui": ["libs/training/ui/src/index.ts"],
       "@connecthealth/shared/domain": ["libs/shared/domain/src/index.ts"],
