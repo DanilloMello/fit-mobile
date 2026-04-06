@@ -11,10 +11,10 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@connecthealth/source": "file:../..",
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-google-signin/google-signin": "^16.1.2",
-    "@tanstack/react-query": "^5.17.0",
     "assert": "^2.1.0",
     "axios": "^1.7.0",
     "buffer": "^6.0.3",

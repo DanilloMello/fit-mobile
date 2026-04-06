@@ -1,7 +1,7 @@
 # UI Component Workflow Guide
 ## fit-mobile
 
-**Complete guide for creating UI components from Figma design to implementation**
+**Complete guide for creating UI components — Visualizer idealization → Figma → implementation**
 
 ---
 
@@ -15,63 +15,46 @@ To create a new UI component:
    ```
 
 2. **Claude uses specialized skills:**
-   - `ui-workflow` - Routes the workflow
+   - `ui-workflow` - Routes the three-stage workflow
    - `analyze-mockup` - Validates against guidelines
    - `create-component` - Implements React Native component
 
-3. **You approve at checkpoints:**
-   - After Figma design fetch
-   - After design analysis
+3. **You approve at three checkpoints:**
+   - After Claude Visualizer mock (idealization)
+   - After Figma transfer
    - Before final implementation
 
 ---
 
-## Workflow Steps
+## Workflow Stages
 
-### Step 1: Get Mockup from Figma
+### Stage 1: Visualizer — Idealization
 
-**When:** User provides Figma URL or has design ready in Figma
+**When:** Any new component request
 
 **Process:**
-1. AI fetches design from Figma using `get_code`:
-   - Design specifications
-   - Component structure
-   - Design tokens (colors, spacing, typography)
-   - Assets references
+1. Claude generates an HTML/SVG mockup in-conversation
+2. Shows all states (default, pressed, disabled, loading, empty)
+3. Iterates freely until layout and intent are right — changes cost nothing here
 
-2. If no URL provided, AI asks for Figma file/node URL
-
-3. Uses `create_design_system_rules` if design system generation needed
-
-**Your Action:** Ensure Figma URL is accessible and design is finalized
+**Your Action:** Approve the mock or request changes. Only when approved does the work move to Figma.
 
 ---
 
-### Step 2: Design Analysis
+### Stage 2: Figma — Design Record
 
-**When:** Figma design specs retrieved
-
-**Skill Used:** `analyze-mockup`
+**When:** Visualizer mock is approved
 
 **Process:**
-Skill analyzes mockup against:
-- ✓ **UI_UX_GUIDELINES.md** - Design system compliance
-- ✓ **DOMAIN_SPEC.md** - Data structure alignment
-- ✓ **PRD.md** - Feature requirements
-- ✓ **CODING_GUIDELINES.md** - Code standards
+1. Claude transfers the approved design to Figma using the Figma MCP
+2. Shares the Figma node URL
+3. Figma becomes the canonical source of truth for the component
 
-**Analysis Report includes:**
-- Requirements validation
-- Accessibility checklist (WCAG 2.1 AA)
-- Design system compliance
-- Responsive design review
-- Recommendations
-
-**Your Action:** Review analysis and approve or request changes
+**Your Action:** Review the Figma frame and approve. Implementation follows Figma, not the mock.
 
 ---
 
-### Step 3: Component Implementation
+### Stage 3: Component Implementation
 
 **When:** Design analysis approved
 
@@ -150,7 +133,7 @@ The `ui-workflow` skill contains the comprehensive, centralized reference for al
 **Platform-wide** (via `fit-mobile-docs` MCP):
 - **[DESIGN_SYSTEM.md](../../fit-common/docs/DESIGN_SYSTEM.md)** - Design tokens, colors, typography, spacing, accessibility
 - **[DOMAIN_SPEC.md](../../fit-common/docs/DOMAIN_SPEC.md)** - Entities, enums, business rules
-- **[PRD.md](../../fit-common/docs/PRD.md)** - Product requirements
+- **PRD.md** - Product requirements (moved to `connecthealth/docs/PRD.md`)
 - **[CODING_GUIDELINES.md](../../fit-common/docs/CODING_GUIDELINES.md)** - Code standards
 
 **Mobile-specific** (fit-mobile local):
@@ -182,26 +165,14 @@ The `ui-workflow` skill contains the comprehensive, centralized reference for al
 ```
 
 **Workflow:**
-1. 🎨 Fetches design from Figma:
-   - Client name, photo, email
-   - Active status badge
-   - Edit button
-   - Responsive layout
-2. ✅ Analysis approved:
-   - Accessibility ✓
-   - Design system ✓
-   - Domain alignment ✓
-3. 💻 Generates component:
+1. 🖼 Visualizer mock generated — client name, photo, email, status badge, edit button
+2. ✅ Mock approved
+3. 🎨 Transferred to Figma — node URL shared
+4. ✅ Figma approved
+5. 💻 Component generated:
    - `libs/client/ui/src/components/ClientProfileHeader.tsx`
    - `libs/client/ui/src/components/ClientProfileHeader.test.tsx`
    - Updates `libs/client/ui/src/index.ts`
-
-**Deliverables:**
-- Figma design specs
-- Analysis report
-- Working component
-- Tests
-- Documentation
 
 ---
 
@@ -213,14 +184,11 @@ The `ui-workflow` skill contains the comprehensive, centralized reference for al
 ```
 
 **Workflow:**
-1. 🎨 Fetches design from Figma:
-   - Exercise name
-   - Muscle group badge
-   - Equipment icon
-   - Sets x Reps
-   - Swipeable actions (edit, delete)
-2. ✅ Analysis approved
-3. 💻 Generates component at:
+1. 🖼 Visualizer mock generated — exercise name, muscle badge, equipment icon, sets×reps, swipe actions
+2. ✅ Mock approved
+3. 🎨 Transferred to Figma
+4. ✅ Figma approved
+5. 💻 Component generated:
    - `libs/training/ui/src/components/ExerciseCard.tsx`
 
 ---
@@ -348,15 +316,16 @@ Before component is complete:
 
 ## Changelog
 
+- **2026-04-05:** Restored Visualizer → Figma → Implementation pipeline
+  - Visualizer is now the idealization stage (iterate freely before touching Figma)
+  - Figma re-instated as required step and canonical source of truth
+  - Implementation always follows Figma, not the raw mock
+- **2026-04-02:** Simplified to Visualizer-only (no Figma) — reverted
 - **2026-02-16:** Updated to Figma-first workflow
   - Replaced Stitch with Figma MCP integration
-  - Streamlined to 3-step workflow
-  - Direct design fetch from Figma
 - **2026-02-15:** Initial workflow creation
-  - Created UI/UX guidelines
-  - Automated workflow from design to implementation
 
 ---
 
-**Last Updated:** 2026-02-16
+**Last Updated:** 2026-04-05
 **Owner:** ConnectHealth Mobile Team
