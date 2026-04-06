@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Summer Strength Block</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background: #E2E8F0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    padding: 24px;
+  }
+
+  .phone-frame {
+    width: 375px;
+    background: #F0F9FF;
+    border-radius: 44px;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.08);
+    position: relative;
+  }
+
+  .phone-inner {
+    height: 812px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .phone-inner::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* STATUS BAR */
+  .status-bar {
+    background: #F0F9FF;
+    padding: 14px 20px 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #0F172A;
+    letter-spacing: -0.3px;
+  }
+
+  /* HEADER */
+  .header {
+    padding: 16px 16px 0;
+    position: relative;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .header-left {
+    flex: 1;
+  }
+
+  .plan-title {
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 30px;
+    letter-spacing: -0.6px;
+    color: #0F172A;
+    margin-bottom: 10px;
+    text-transform: capitalize;
+  }
+
+  .pill-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 999px;
+    line-height: 1.4;
+    border: 1px solid;
+  }
+
+  .pill-indigo {
+    background: #EEF2FF;
+    color: #6366F1;
+    border-color: #C7D2FE;
+  }
+
+  .pill-gray {
+    background: #F1F5F9;
+    color: #64748B;
+    border-color: #CBD5E1;
+  }
+
+  .gear-btn {
+    width: 32px;
+    height: 32px;
+    background: #F1F5F9;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #64748B;
+    flex-shrink: 0;
+    cursor: pointer;
+    border: none;
+  }
+
+  /* PROGRESS ROW */
+  .progress-row {
+    padding: 16px;
+    margin-top: 8px;
+  }
+
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .progress-label {
+    font-size: 12px;
+    font-weight: 400;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    line-height: 20px;
+  }
+
+  .progress-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2BBAED;
+    line-height: 20px;
+  }
+
+  .progress-bar-track {
+    width: 100%;
+    height: 4px;
+    background: #E2E8F0;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: #2BBAED;
+    border-radius: 999px;
+  }
+
+  /* MESOCYCLE LIST */
+  .meso-list {
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .meso-card {
+    background: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+
+  .meso-card-active {
+    border: 1.5px solid #6366F1;
+  }
+
+  .meso-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .meso-left {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .meso-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .meso-dot {
+    font-size: 8px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .meso-name {
+    font-weight: 500;
+    font-size: 15px;
+    color: #0F172A;
+    line-height: 1.4;
+  }
+
+  .meso-sub {
+    font-size: 14px;
+    font-weight: 400;
+    color: #64748B;
+    line-height: 20px;
+    padding-left: 16px;
+  }
+
+  .meso-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .badge {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 999px;
+    line-height: 1.4;
+  }
+
+  .badge-done {
+    background: #DCFCE7;
+    color: #16A34A;
+  }
+
+  .badge-pending {
+    background: #FEF9C3;
+    color: #CA8A04;
+  }
+
+  .chevron {
+    font-size: 13px;
+    color: #64748B;
+    font-weight: 400;
+  }
+
+  .chevron-active {
+    color: #6366F1;
+    font-size: 14px;
+  }
+
+  /* EXPANDED CONTENT */
+  .expanded-content {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+
+  .week-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    position: relative;
+  }
+
+  .week-row + .week-row::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 14px;
+    right: 14px;
+    height: 1px;
+    background: #E2E8F0;
+  }
+
+  .week-badge {
+    background: #EEF2FF;
+    color: #6366F1;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 6px;
+    min-width: 28px;
+    text-align: center;
+    line-height: 1.5;
+    flex-shrink: 0;
+  }
+
+  .week-label {
+    font-size: 14px;
+    font-weight: 400;
+    color: #0F172A;
+    line-height: 20px;
+    margin-left: 10px;
+    flex: 1;
+  }
+
+  .week-action-active {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2BBAED;
+    line-height: 20px;
+    white-space: nowrap;
+  }
+
+  .week-action-empty {
+    font-size: 14px;
+    font-weight: 400;
+    color: #64748B;
+    line-height: 20px;
+    white-space: nowrap;
+  }
+
+  /* ADD MESOCYCLE */
+  .add-meso {
+    margin: 10px 16px 0;
+    border: 1.5px dashed #CBD5E1;
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    background: #F8FAFC;
+    cursor: pointer;
+  }
+
+  .add-meso-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748B;
+    line-height: 20px;
+  }
+
+  /* BOTTOM CTA */
+  .bottom-cta {
+    padding: 16px;
+    margin-top: 12px;
+    padding-bottom: 24px;
+  }
+
+  .save-btn {
+    width: 100%;
+    height: 52px;
+    background: #6366F1;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.1px;
+    transition: opacity 0.15s;
+  }
+
+  .save-btn:hover {
+    opacity: 0.92;
+  }
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+  <div class="phone-inner">
+
+    <!-- STATUS BAR -->
+    <div class="status-bar">9:41</div>
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-top">
+        <div class="header-left">
+          <div class="plan-title">Summer strength block</div>
+          <div class="pill-row">
+            <span class="pill pill-indigo">Linear · Strength</span>
+            <span class="pill pill-gray">12 wks</span>
+          </div>
+        </div>
+        <button class="gear-btn">⚙</button>
+      </div>
+    </div>
+
+    <!-- PROGRESS ROW -->
+    <div class="progress-row">
+      <div class="progress-meta">
+        <span class="progress-label">Mesocycles</span>
+        <span class="progress-value">12 / 12 weeks</span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" style="width: 100%;"></div>
+      </div>
+    </div>
+
+    <!-- MESOCYCLE LIST -->
+    <div class="meso-list">
+
+      <!-- Card A: Hypertrophy (done) -->
+      <div class="meso-card">
+        <div class="meso-card-header">
+          <div class="meso-left">
+            <div class="meso-name-row">
+              <span class="meso-dot" style="color: #22C55E;">●</span>
+              <span class="meso-name">Hypertrophy</span>
+            </div>
+            <span class="meso-sub">Wks 1–4 · 4 microcycles</span>
+          </div>
+          <div class="meso-right">
+            <span class="badge badge-done">done</span>
+            <span class="chevron">›</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card B: Strength (expanded/active) -->
+      <div class="meso-card meso-card-active">
+        <div class="meso-card-header">
+          <div class="meso-left">
+            <div class="meso-name-row">
+              <span class="meso-dot" style="color: #6366F1;">●</span>
+              <span class="meso-name">Strength</span>
+            </div>
+            <span class="meso-sub">Wks 5–8 · 4 microcycles</span>
+          </div>
+          <div class="meso-right">
+            <span class="chevron-active">∨</span>
+          </div>
+        </div>
+
+        <!-- Expanded content -->
+        <div class="expanded-content">
+          <div class="week-row">
+            <span class="week-badge">W5</span>
+            <span class="week-label">Week 5</span>
+            <span class="week-action-active">4 workouts ›</span>
+          </div>
+          <div class="week-row">
+            <span class="week-badge">W6</span>
+            <span class="week-label">Week 6</span>
+            <span class="week-action-active">4 workouts ›</span>
+          </div>
+          <div class="week-row">
+            <span class="week-badge">W7</span>
+            <span class="week-label">Week 7</span>
+            <span class="week-action-empty">empty ›</span>
+          </div>
+          <div class="week-row">
+            <span class="week-badge">W8</span>
+            <span class="week-label">Week 8</span>
+            <span class="week-action-empty">empty ›</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card C: Peaking (pending) -->
+      <div class="meso-card">
+        <div class="meso-card-header">
+          <div class="meso-left">
+            <div class="meso-name-row">
+              <span class="meso-dot" style="color: #F97316;">●</span>
+              <span class="meso-name">Peaking</span>
+            </div>
+            <span class="meso-sub">Wks 9–11 · 3 microcycles</span>
+          </div>
+          <div class="meso-right">
+            <span class="badge badge-pending">pending</span>
+            <span class="chevron">›</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card D: Deload (pending) -->
+      <div class="meso-card">
+        <div class="meso-card-header">
+          <div class="meso-left">
+            <div class="meso-name-row">
+              <span class="meso-dot" style="color: #94A3B8;">●</span>
+              <span class="meso-name">Deload</span>
+            </div>
+            <span class="meso-sub">Wk 12 · 1 microcycle</span>
+          </div>
+          <div class="meso-right">
+            <span class="badge badge-pending">pending</span>
+            <span class="chevron">›</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ADD MESOCYCLE -->
+    <div class="add-meso">
+      <span class="add-meso-text">+ Add mesocycle</span>
+    </div>
+
+    <!-- BOTTOM CTA -->
+    <div class="bottom-cta">
+      <button class="save-btn">Save plan</button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
