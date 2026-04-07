@@ -50,7 +50,7 @@ export default function AppLayout() {
       <Tabs.Screen
         name="financial/index"
         options={{
-          title: 'Financial',
+          title: 'Wallet',
           tabBarIcon: ({ color, size }) => (
             <TabIcon name="wallet-outline" color={color} size={size} />
           ),
@@ -59,7 +59,7 @@ export default function AppLayout() {
       <Tabs.Screen
         name="library/index"
         options={{
-          title: 'Library',
+          title: 'Workouts',
           tabBarIcon: ({ color, size }) => (
             <TabIcon name="barbell-outline" color={color} size={size} />
           ),
@@ -68,9 +68,9 @@ export default function AppLayout() {
       <Tabs.Screen
         name="profile/index"
         options={{
-          title: 'Profile',
+          title: 'Settings',
           tabBarIcon: ({ color, size }) => (
-            <TabIcon name="person-outline" color={color} size={size} />
+            <TabIcon name="settings-outline" color={color} size={size} />
           ),
         }}
       />
