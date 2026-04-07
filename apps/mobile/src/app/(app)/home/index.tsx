@@ -3,6 +3,7 @@ import {
   Alert,
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -10,10 +11,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 import {
   FAB,
-  SegmentedControl,
   spacing,
   typography,
   useThemeColors,
@@ -28,10 +29,18 @@ import {
 import { PlanSummaryDto } from '@connecthealth/training/infrastructure';
 
 type HomeTab = 'workouts' | 'clients';
+type PlanFilter = 'my' | 'active' | 'inactive' | 'drafts';
 
-const TABS = [
-  { label: 'Workouts', value: 'workouts' as HomeTab },
-  { label: 'Clients', value: 'clients' as HomeTab },
+const TABS: { label: string; value: HomeTab }[] = [
+  { label: 'Workout', value: 'workouts' },
+  { label: 'Clients', value: 'clients' },
+];
+
+const FILTERS: { label: string; value: PlanFilter }[] = [
+  { label: 'my', value: 'my' },
+  { label: 'active', value: 'active' },
+  { label: 'inactive', value: 'inactive' },
+  { label: 'drafts', value: 'drafts' },
 ];
 
 export default function HomeScreen() {
@@ -39,6 +48,7 @@ export default function HomeScreen() {
   const styles = createStyles(colors);
 
   const [activeTab, setActiveTab] = useState<HomeTab>('workouts');
+  const [activeFilter, setActiveFilter] = useState<PlanFilter>('my');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [planName, setPlanName] = useState('');
   const [planWeeks, setPlanWeeks] = useState('12');
@@ -76,24 +86,90 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Home</Text>
-        <SegmentedControl
-          options={TABS}
-          value={activeTab}
-          onChange={setActiveTab}
-        />
+      {/* Inline tab bar */}
+      <View style={styles.tabBar}>
+        {TABS.map((tab) => {
+          const isActive = activeTab === tab.value;
+          return (
+            <Pressable
+              key={tab.value}
+              style={styles.tab}
+              onPress={() => setActiveTab(tab.value)}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: isActive }}
+            >
+              <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
+                {tab.label}
+              </Text>
+              {isActive && <View style={styles.tabIndicator} />}
+            </Pressable>
+          );
+        })}
       </View>
 
       {activeTab === 'workouts' ? (
         <View style={styles.listContainer}>
-          <PlanList
-            plans={plans}
-            isLoading={isLoading}
-            error={error}
-            onPlanPress={handlePlanPress}
-            onRetry={refetch}
-          />
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Search row */}
+            <View style={styles.searchRow}>
+              <View style={styles.searchBox}>
+                <Ionicons
+                  name="search-outline"
+                  size={14}
+                  color={colors.textPlaceholder}
+                />
+                <Text style={styles.searchPlaceholder}>Search...</Text>
+              </View>
+              <View style={styles.filterBtn}>
+                <Ionicons
+                  name="options-outline"
+                  size={16}
+                  color={colors.textSecondary}
+                />
+              </View>
+            </View>
+
+            {/* Filter chips */}
+            <View style={styles.chips}>
+              {FILTERS.map((f) => {
+                const isActive = activeFilter === f.value;
+                return (
+                  <Pressable
+                    key={f.value}
+                    style={[styles.chip, isActive && styles.chipActive]}
+                    onPress={() => setActiveFilter(f.value)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: isActive }}
+                  >
+                    <Text
+                      style={[
+                        styles.chipText,
+                        isActive && styles.chipTextActive,
+                      ]}
+                    >
+                      {f.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {/* Section title */}
+            <Text style={styles.sectionTitle}>My workout plans</Text>
+
+            {/* Plan list */}
+            <PlanList
+              plans={plans}
+              isLoading={isLoading}
+              error={error}
+              onPlanPress={handlePlanPress}
+              onRetry={refetch}
+            />
+          </ScrollView>
+
           <FAB
             label="New Plan"
             onPress={() => setShowCreateModal(true)}
@@ -174,20 +250,117 @@ function createStyles(colors: ColorPalette) {
       flex: 1,
       backgroundColor: colors.background,
     },
-    header: {
+
+    // Inline tab bar
+    tabBar: {
+      flexDirection: 'row',
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
       paddingHorizontal: spacing.md,
-      paddingTop: spacing.md,
-      paddingBottom: spacing.sm,
-      gap: spacing.md,
-      backgroundColor: colors.background,
     },
-    title: {
-      ...typography.display,
+    tab: {
+      flex: 1,
+      alignItems: 'center',
+      paddingVertical: spacing.sm,
+      position: 'relative',
+    },
+    tabText: {
+      ...typography.label,
+      color: colors.textMuted,
+      fontWeight: '400',
+    },
+    tabTextActive: {
       color: colors.textPrimary,
+      fontWeight: '500',
     },
+    tabIndicator: {
+      position: 'absolute',
+      bottom: -1,
+      left: '20%',
+      right: '20%',
+      height: 2,
+      borderRadius: 2,
+      backgroundColor: colors.brand,
+    },
+
+    // Workouts content
     listContainer: {
       flex: 1,
     },
+    scrollContent: {
+      padding: spacing.sm,
+    },
+
+    // Search row
+    searchRow: {
+      flexDirection: 'row',
+      gap: spacing.xs,
+      marginBottom: spacing.sm,
+    },
+    searchBox: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      backgroundColor: colors.input,
+      borderRadius: radii.sm,
+      borderWidth: 0.5,
+      borderColor: colors.border,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      minHeight: 40,
+    },
+    searchPlaceholder: {
+      ...typography.bodySmall,
+      color: colors.textPlaceholder,
+    },
+    filterBtn: {
+      width: 40,
+      height: 40,
+      backgroundColor: colors.input,
+      borderRadius: radii.sm,
+      borderWidth: 0.5,
+      borderColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+    // Filter chips
+    chips: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.xs,
+      marginBottom: spacing.md,
+    },
+    chip: {
+      paddingVertical: 6,
+      paddingHorizontal: spacing.md,
+      borderRadius: 20,
+      borderWidth: 0.5,
+      borderColor: colors.border,
+      backgroundColor: 'transparent',
+    },
+    chipActive: {
+      backgroundColor: colors.brand,
+      borderColor: colors.brand,
+    },
+    chipText: {
+      ...typography.caption,
+      color: colors.textSecondary,
+    },
+    chipTextActive: {
+      color: colors.textPrimary,
+      fontWeight: '500',
+    },
+
+    // Section title
+    sectionTitle: {
+      ...typography.label,
+      color: colors.textPrimary,
+      marginBottom: spacing.sm,
+    },
+
+    // Clients placeholder
     placeholder: {
       flex: 1,
       alignItems: 'center',
@@ -199,6 +372,7 @@ function createStyles(colors: ColorPalette) {
       color: colors.textMuted,
       textAlign: 'center',
     },
+
     // Modal
     modalOverlay: {
       flex: 1,
