@@ -6,29 +6,10 @@ import {
   shadows,
   spacing,
   typography,
-  StatusDot,
-  StatusDotVariant,
   useThemeColors,
   ColorPalette,
 } from '@connecthealth/shared/ui';
-import { PlanStatus } from '@connecthealth/training/domain';
 import { PlanSummaryDto } from '@connecthealth/training/infrastructure';
-
-const STATUS_DOT_MAP: Record<PlanStatus, StatusDotVariant> = {
-  DRAFT: 'draft',
-  ACTIVE: 'active',
-  PAUSED: 'paused',
-  CANCELED: 'canceled',
-  COMPLETED: 'completed',
-};
-
-const STATUS_LABEL: Record<PlanStatus, string> = {
-  DRAFT: 'Draft',
-  ACTIVE: 'Active',
-  PAUSED: 'Paused',
-  CANCELED: 'Canceled',
-  COMPLETED: 'Completed',
-};
 
 interface PlanCardProps {
   plan: PlanSummaryDto;
@@ -52,15 +33,11 @@ export function PlanCard({ plan, onPress }: PlanCardProps) {
       ]}
       onPress={() => onPress(plan)}
       accessibilityRole="button"
-      accessibilityLabel={`${plan.name}, ${STATUS_LABEL[plan.status]}`}
+      accessibilityLabel={plan.name}
       accessibilityHint="Double tap to open plan builder"
     >
       <View style={styles.header}>
-        <View style={styles.titleRow}>
-          <StatusDot variant={STATUS_DOT_MAP[plan.status]} size={10} />
-          <Text style={styles.name} numberOfLines={1}>{plan.name}</Text>
-        </View>
-        <Text style={styles.status}>{STATUS_LABEL[plan.status]}</Text>
+        <Text style={styles.name} numberOfLines={1}>{plan.name}</Text>
       </View>
 
       {plan.clientName ? (
@@ -111,26 +88,11 @@ function createStyles(colors: ColorPalette) {
       opacity: 0.85,
     },
     header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: spacing.sm,
       marginBottom: spacing.xxs,
-    },
-    titleRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.xs,
-      flex: 1,
     },
     name: {
       ...typography.button,
       color: colors.textPrimary,
-      flex: 1,
-    },
-    status: {
-      ...typography.caption,
-      color: colors.textMuted,
     },
     client: {
       ...typography.bodySmall,

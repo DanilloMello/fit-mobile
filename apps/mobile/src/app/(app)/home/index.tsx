@@ -27,18 +27,10 @@ import {
 import { PlanSummaryDto } from '@connecthealth/training/infrastructure';
 
 type HomeTab = 'workouts' | 'clients';
-type PlanFilter = 'my' | 'active' | 'inactive' | 'drafts';
 
 const TABS: { label: string; value: HomeTab }[] = [
   { label: 'Workouts', value: 'workouts' },
   { label: 'Clients', value: 'clients' },
-];
-
-const FILTERS: { label: string; value: PlanFilter }[] = [
-  { label: 'my', value: 'my' },
-  { label: 'active', value: 'active' },
-  { label: 'inactive', value: 'inactive' },
-  { label: 'drafts', value: 'drafts' },
 ];
 
 export default function HomeScreen() {
@@ -111,13 +103,6 @@ export default function HomeScreen() {
               accessibilityLabel="Filter"
             >
               <Ionicons name="options-outline" size={18} color={colors.textMuted} />
-            </View>
-          </View>
-
-          {/* ── Filter chips ─────────────────── */}
-          <View style={styles.chipsRow}>
-            <View style={[styles.chip, styles.chipActive]}>
-              <Text style={[styles.chipText, styles.chipTextActive]}>my</Text>
             </View>
           </View>
 
@@ -228,32 +213,6 @@ function createStyles(colors: ColorPalette) {
       borderColor: colors.border,
       alignItems: 'center',
       justifyContent: 'center',
-    },
-
-    // ── Chips ──
-    chipsRow: {
-      flexDirection: 'row',
-      gap: spacing.xs,
-      marginBottom: spacing.md,
-    },
-    chip: {
-      paddingHorizontal: spacing.sm,
-      paddingVertical: 6,
-      borderRadius: 20,
-      borderWidth: 0.5,
-      borderColor: colors.border,
-    },
-    chipActive: {
-      backgroundColor: colors.brand,
-      borderColor: colors.brand,
-    },
-    chipText: {
-      ...typography.caption,
-      color: colors.textMuted,
-    },
-    chipTextActive: {
-      color: '#fff',
-      fontWeight: '500' as const,
     },
 
     // ── Section ──
