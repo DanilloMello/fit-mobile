@@ -1,99 +1,142 @@
 import React, { useState } from 'react';
 import {
   Alert,
-  FlatList,
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 import {
-  FAB,
   LoadingSpinner,
+  ProgressBar,
   spacing,
   typography,
   useThemeColors,
   ColorPalette,
   radii,
+  shadows,
 } from '@connecthealth/shared/ui';
-import { MesocycleCard } from '@connecthealth/training/ui';
 import {
   usePlanDetail,
   useAddMesocycle,
-  useDeleteMesocycle,
+  useUpdatePlan,
+  MesocycleAccordionCard,
+  PlanSettingsSheet,
+  MesocycleFormSheet,
+  MicrocycleFormSheet,
+  AddItemRow,
+  MOCK_PLAN,
+  MockPlanDetailDto,
 } from '@connecthealth/training/ui';
-import { MesocycleDto } from '@connecthealth/training/infrastructure';
+import { Goal } from '@connecthealth/training/domain';
+import { UpdatePlanDto } from '@connecthealth/training/infrastructure';
+
+// ─── Toggle this to use mock data for wireframe visualization ─────────────────
+const USE_MOCK = true;
+
+const GOAL_LABELS: Record<Goal, string> = {
+  HYPERTROPHY:  'Hypertrophy',
+  STRENGTH:     'Strength',
+  WEIGHT_LOSS:  'Weight loss',
+  CONDITIONING: 'Conditioning',
+  HEALTH:       'Health',
+};
 
 export default function PlanBuilderScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
-  const { data: plan, isLoading, error } = usePlanDetail(id);
+  const { data: apiPlan, isLoading, error } = usePlanDetail(USE_MOCK ? '' : id);
   const addMesocycle = useAddMesocycle(id);
-  const deleteMesocycle = useDeleteMesocycle(id);
+  const updatePlan   = useUpdatePlan();
 
-  const [showAddModal, setShowAddModal] = useState(false);
+  // Use mock or API data
+  const plan: MockPlanDetailDto | null = USE_MOCK
+    ? MOCK_PLAN
+    : (apiPlan as unknown as MockPlanDetailDto | null) ?? null;
+
+  // Accordion state
+  const [expandedMesoId, setExpandedMesoId] = useState<string | null>(null);
+
+  // Plan settings sheet
+  const [settingsVisible, setSettingsVisible] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editGoal, setEditGoal] = useState('');
+  const [editDuration, setEditDuration] = useState(360);
+
+  // Mesocycle form sheet
+  const [mesoFormVisible, setMesoFormVisible] = useState(false);
   const [mesoName, setMesoName] = useState('');
-  const [mesoStart, setMesoStart] = useState('');
-  const [mesoEnd, setMesoEnd] = useState('');
+  const [mesoGoal, setMesoGoal] = useState('');
+  const [mesoDuration, setMesoDuration] = useState(28);
+
+  // Microcycle form sheet
+  const [microFormVisible, setMicroFormVisible] = useState(false);
+  const [microName, setMicroName] = useState('');
+  const [microGoal, setMicroGoal] = useState('');
+  const [microDuration, setMicroDuration] = useState(7);
+
+  const openSettings = () => {
+    if (plan) {
+      setEditName(plan.name);
+      setEditGoal(plan.goal ? GOAL_LABELS[plan.goal as Goal] ?? plan.goal : '');
+      setEditDuration(plan.durationDays ?? plan.totalWeeks * 7);
+    }
+    setSettingsVisible(true);
+  };
+
+  const handleSaveSettings = async () => {
+    if (USE_MOCK) { setSettingsVisible(false); return; }
+    const dto: UpdatePlanDto = {};
+    const trimmed = editName.trim();
+    if (trimmed) dto.name = trimmed;
+    dto.totalWeeks = Math.max(1, Math.round(editDuration / 7));
+    try {
+      await updatePlan.mutateAsync({ id, dto });
+      setSettingsVisible(false);
+    } catch {
+      Alert.alert('Error', 'Could not update plan. Please try again.');
+    }
+  };
 
   const handleAddMesocycle = async () => {
-    const startWeek = parseInt(mesoStart, 10);
-    const endWeek = parseInt(mesoEnd, 10);
-
-    if (!mesoName.trim() || isNaN(startWeek) || isNaN(endWeek)) {
-      Alert.alert('Invalid input', 'Please fill in all fields correctly.');
+    if (USE_MOCK) {
+      setMesoFormVisible(false);
+      setMesoName(''); setMesoGoal(''); setMesoDuration(28);
       return;
     }
-    if (startWeek >= endWeek) {
-      Alert.alert('Invalid weeks', 'End week must be greater than start week.');
+    if (!mesoName.trim()) {
+      Alert.alert('Name required', 'Please enter a mesocycle name.');
       return;
     }
-
+    const weeks = Math.max(1, Math.round(mesoDuration / 7));
+    const lastMeso = plan?.mesocycles[plan.mesocycles.length - 1];
+    const startWeek = lastMeso ? lastMeso.endWeek + 1 : 1;
+    const endWeek   = startWeek + weeks - 1;
     try {
-      await addMesocycle.mutateAsync({
-        name: mesoName.trim(),
-        startWeek,
-        endWeek,
-      });
-      setShowAddModal(false);
-      setMesoName('');
-      setMesoStart('');
-      setMesoEnd('');
+      await addMesocycle.mutateAsync({ name: mesoName.trim(), startWeek, endWeek });
+      setMesoFormVisible(false);
+      setMesoName(''); setMesoGoal(''); setMesoDuration(28);
     } catch {
       Alert.alert('Error', 'Could not add mesocycle. Please try again.');
     }
   };
 
-  const handleDeleteMesocycle = (meso: MesocycleDto) => {
-    Alert.alert(
-      'Delete Mesocycle',
-      `Delete "${meso.name}"? This will remove all workout days inside it.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => deleteMesocycle.mutate(meso.id),
-        },
-      ]
-    );
+  const handleAddMicrocycle = () => {
+    // TODO: wire up useAddMicrocycle hook when API endpoint is ready
+    setMicroFormVisible(false);
+    setMicroName(''); setMicroGoal(''); setMicroDuration(7);
   };
 
-  const handleWorkoutDayPress = (dayId: string) => {
-    router.push(`/(app)/plans/${id}/workout-day/${dayId}`);
-  };
+  if (!USE_MOCK && isLoading) return <LoadingSpinner />;
 
-  if (isLoading) return <LoadingSpinner />;
-
-  if (error || !plan) {
+  if (!USE_MOCK && (error || !plan)) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
         <View style={styles.center}>
@@ -103,140 +146,157 @@ export default function PlanBuilderScreen() {
     );
   }
 
+  if (!plan) return null;
+
+  const goalLabel = plan.goal ? (GOAL_LABELS[plan.goal as Goal] ?? plan.goal) : null;
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      {/* Header */}
+
+      {/* ── Header ─────────────────────────────── */}
       <View style={styles.header}>
         <Pressable
-          style={styles.backBtn}
           onPress={() => router.back()}
           accessibilityRole="button"
           accessibilityLabel="Go back"
           hitSlop={8}
+          style={styles.backBtn}
         >
-          <Text style={styles.backIcon}>←</Text>
+          <Ionicons name="chevron-back" size={22} color={colors.textPrimary} />
         </Pressable>
-        <View style={styles.headerText}>
-          <Text style={styles.planName} numberOfLines={1}>
-            {plan.name}
-          </Text>
-          <Text style={styles.planMeta}>
-            {plan.totalWeeks}w · {plan.status}
-          </Text>
-        </View>
-      </View>
 
-      {/* Mesocycles */}
-      <FlatList
-        data={plan.mesocycles}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        renderItem={({ item }) => (
-          <View>
-            <MesocycleCard
-              mesocycle={item}
-              onDelete={handleDeleteMesocycle}
-            />
-            {/* Workout days within this mesocycle */}
-            {item.microcycles.flatMap((micro) =>
-              micro.workoutDays.map((day) => (
-                <Pressable
-                  key={day.id}
-                  style={styles.dayRow}
-                  onPress={() => handleWorkoutDayPress(day.id)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${day.label ?? day.dayOfWeek}, ${day.exerciseCount ?? 0} exercises`}
-                >
-                  <Text style={styles.dayLabel}>
-                    {day.label ?? day.dayOfWeek}
-                  </Text>
-                  <Text style={styles.dayMeta}>
-                    Week {micro.weekNumber} · {day.exerciseCount ?? 0} exercises
-                  </Text>
-                </Pressable>
-              ))
-            )}
-          </View>
-        )}
-        ListEmptyComponent={
-          <View style={styles.center}>
-            <Text style={styles.emptyText}>No mesocycles yet</Text>
-            <Text style={styles.emptyBody}>
-              Tap + to add your first training block
+        <View style={styles.headerMid}>
+          <Text style={styles.planName} numberOfLines={1}>{plan.name}</Text>
+          <View style={styles.tagsRow}>
+            {goalLabel ? (
+              <View style={styles.goalPill}>
+                <Text style={styles.goalPillText}>{goalLabel}</Text>
+              </View>
+            ) : null}
+            <Text style={styles.durationText}>
+              {plan.durationDays ?? plan.totalWeeks * 7} days
             </Text>
           </View>
-        }
-      />
-
-      <FAB
-        label="Add Block"
-        onPress={() => setShowAddModal(true)}
-        accessibilityLabel="Add mesocycle"
-      />
-
-      {/* Add Mesocycle Modal */}
-      <Modal
-        visible={showAddModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowAddModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalSheet, { backgroundColor: colors.surface }]}>
-            <Text style={styles.modalTitle}>New Mesocycle</Text>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Name (e.g. Hypertrophy)"
-              placeholderTextColor={colors.textPlaceholder}
-              value={mesoName}
-              onChangeText={setMesoName}
-              accessibilityLabel="Mesocycle name"
-            />
-            <View style={styles.weekRow}>
-              <TextInput
-                style={[styles.input, styles.weekInput]}
-                placeholder="Start week"
-                placeholderTextColor={colors.textPlaceholder}
-                value={mesoStart}
-                onChangeText={setMesoStart}
-                keyboardType="number-pad"
-                accessibilityLabel="Start week"
-              />
-              <TextInput
-                style={[styles.input, styles.weekInput]}
-                placeholder="End week"
-                placeholderTextColor={colors.textPlaceholder}
-                value={mesoEnd}
-                onChangeText={setMesoEnd}
-                keyboardType="number-pad"
-                accessibilityLabel="End week"
-              />
-            </View>
-
-            <View style={styles.modalActions}>
-              <Pressable
-                style={[styles.modalBtn, { backgroundColor: colors.input }]}
-                onPress={() => setShowAddModal(false)}
-              >
-                <Text style={[styles.modalBtnText, { color: colors.textPrimary }]}>
-                  Cancel
-                </Text>
-              </Pressable>
-              <Pressable
-                style={[styles.modalBtn, { backgroundColor: colors.brand }]}
-                onPress={handleAddMesocycle}
-                disabled={addMesocycle.isPending}
-              >
-                <Text style={[styles.modalBtnText, { color: '#fff' }]}>
-                  {addMesocycle.isPending ? 'Adding…' : 'Add'}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
         </View>
-      </Modal>
+
+        <Pressable
+          style={styles.gearBtn}
+          onPress={openSettings}
+          accessibilityRole="button"
+          accessibilityLabel="Plan settings"
+          hitSlop={8}
+        >
+          <Ionicons name="settings-outline" size={20} color={colors.textMuted} />
+        </Pressable>
+      </View>
+
+      {/* ── Progress ───────────────────────────── */}
+      <View style={styles.progressSection}>
+        <View style={styles.progressHeader}>
+          <Text style={styles.progressLabel}>WORKOUTS</Text>
+          <Text style={styles.progressCount}>
+            {plan.workoutsDone} / {plan.workoutsTotal}
+          </Text>
+        </View>
+        <ProgressBar current={plan.workoutsDone} total={plan.workoutsTotal} height={3} />
+      </View>
+
+      {/* ── Mesocycle list ─────────────────────── */}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {plan.mesocycles.map((meso) => (
+          <MesocycleAccordionCard
+            key={meso.id}
+            mesocycle={meso}
+            expanded={expandedMesoId === meso.id}
+            onToggle={() =>
+              setExpandedMesoId(expandedMesoId === meso.id ? null : meso.id)
+            }
+            onMicrocyclePress={(microcycleId) =>
+              router.push(`/(app)/plans/${id}/week/${microcycleId}`)
+            }
+            onAddMicrocycle={() => {
+              setMicroName('');
+              setMicroGoal('');
+              setMicroDuration(7);
+              setMicroFormVisible(true);
+            }}
+          />
+        ))}
+
+        <AddItemRow
+          label="+ Add mesocycle"
+          onPress={() => {
+            setMesoName('');
+            setMesoGoal('');
+            setMesoDuration(28);
+            setMesoFormVisible(true);
+          }}
+          variant="card"
+        />
+
+        <View style={{ height: spacing.xl }} />
+      </ScrollView>
+
+      {/* ── Save plan sticky button ────────────── */}
+      <View style={styles.saveContainer}>
+        <Pressable
+          style={({ pressed }) => [styles.saveBtn, pressed && styles.saveBtnPressed]}
+          onPress={() =>
+            Alert.alert(
+              'Plan saved',
+              USE_MOCK ? 'Mock — no API call in preview mode.' : 'Your plan has been saved.'
+            )
+          }
+          accessibilityRole="button"
+          accessibilityLabel="Save plan"
+        >
+          <Text style={styles.saveBtnText}>Save plan</Text>
+        </Pressable>
+      </View>
+
+      {/* ── Sheets ─────────────────────────────── */}
+      <PlanSettingsSheet
+        visible={settingsVisible}
+        onClose={() => setSettingsVisible(false)}
+        planName={editName}
+        onPlanNameChange={setEditName}
+        goal={editGoal}
+        onGoalChange={setEditGoal}
+        totalDuration={editDuration}
+        onTotalDurationChange={setEditDuration}
+        onDone={handleSaveSettings}
+        isPending={updatePlan.isPending}
+      />
+
+      <MesocycleFormSheet
+        visible={mesoFormVisible}
+        onClose={() => setMesoFormVisible(false)}
+        name={mesoName}
+        onNameChange={setMesoName}
+        goal={mesoGoal}
+        onGoalChange={setMesoGoal}
+        totalDuration={mesoDuration}
+        onTotalDurationChange={setMesoDuration}
+        onDone={handleAddMesocycle}
+        isPending={addMesocycle.isPending}
+      />
+
+      <MicrocycleFormSheet
+        visible={microFormVisible}
+        onClose={() => setMicroFormVisible(false)}
+        name={microName}
+        onNameChange={setMicroName}
+        goal={microGoal}
+        onGoalChange={setMicroGoal}
+        totalDuration={microDuration}
+        onTotalDurationChange={setMicroDuration}
+        onDone={handleAddMicrocycle}
+      />
+
     </SafeAreaView>
   );
 }
@@ -244,79 +304,87 @@ export default function PlanBuilderScreen() {
 function createStyles(colors: ColorPalette) {
   return StyleSheet.create({
     safeArea: { flex: 1, backgroundColor: colors.background },
+
+    // ── Header ──
     header: {
       flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.sm,
-      gap: spacing.sm,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
-      backgroundColor: colors.background,
+      alignItems: 'flex-start',
+      paddingHorizontal: spacing.sm,
+      paddingTop: spacing.sm,
+      paddingBottom: spacing.xs,
+      gap: spacing.xs,
     },
-    backBtn: { padding: spacing.xxs },
-    backIcon: { ...typography.body, color: colors.brand, fontSize: 20 },
-    headerText: { flex: 1 },
+    backBtn: { padding: spacing.xxs, marginTop: 2 },
+    headerMid: { flex: 1 },
     planName: {
       ...typography.display,
       color: colors.textPrimary,
+      marginBottom: spacing.xxs,
     },
-    planMeta: { ...typography.caption, color: colors.textMuted },
-    list: { padding: spacing.md, paddingBottom: spacing.xxxl },
-    separator: { height: spacing.sm },
-    dayRow: {
-      marginTop: spacing.xxs,
-      marginLeft: spacing.md,
-      paddingVertical: spacing.xs,
-      paddingHorizontal: spacing.sm,
-      borderLeftWidth: 2,
-      borderLeftColor: colors.border,
-    },
-    dayLabel: { ...typography.label, color: colors.textPrimary },
-    dayMeta: { ...typography.caption, color: colors.textMuted },
-    center: {
-      flex: 1,
+    tagsRow: {
+      flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center',
-      padding: spacing.xl,
+      gap: spacing.xs,
+      flexWrap: 'wrap',
+    },
+    goalPill: {
+      backgroundColor: colors.brand + '22',
+      borderRadius: radii.sm,
+      paddingHorizontal: spacing.xs,
+      paddingVertical: 2,
+    },
+    goalPillText: { ...typography.caption, color: colors.brand },
+    durationText:  { ...typography.caption, color: colors.textMuted },
+    gearBtn: { padding: spacing.xxs, marginTop: 4 },
+
+    // ── Progress ──
+    progressSection: {
+      paddingHorizontal: spacing.md,
+      paddingBottom: spacing.md,
       gap: spacing.xs,
     },
-    emptyText: { ...typography.display, color: colors.textPrimary },
-    emptyBody: { ...typography.body, color: colors.textMuted, textAlign: 'center' },
-    errorText: { ...typography.body, color: colors.error },
-    // Modal
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      justifyContent: 'flex-end',
-    },
-    modalSheet: {
-      borderTopLeftRadius: radii.card,
-      borderTopRightRadius: radii.card,
-      padding: spacing.xl,
-      gap: spacing.md,
-    },
-    modalTitle: { ...typography.display, color: colors.textPrimary },
-    input: {
-      backgroundColor: colors.input,
-      borderRadius: radii.sm,
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.sm,
-      ...typography.inputText,
-      color: colors.textPrimary,
-      minHeight: 48,
-    },
-    weekRow: { flexDirection: 'row', gap: spacing.sm },
-    weekInput: { flex: 1 },
-    modalActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs },
-    modalBtn: {
-      flex: 1,
-      borderRadius: radii.sm,
-      paddingVertical: spacing.sm,
+    progressHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
       alignItems: 'center',
-      minHeight: 48,
-      justifyContent: 'center',
     },
-    modalBtnText: { ...typography.button },
+    progressLabel: {
+      ...typography.caption,
+      color: colors.textMuted,
+      letterSpacing: 0.8,
+    },
+    progressCount: { ...typography.caption, color: colors.brand },
+
+    // ── Scroll ──
+    scroll: { flex: 1 },
+    scrollContent: {
+      paddingHorizontal: spacing.md,
+      gap: spacing.xs,
+    },
+
+    // ── Save button ──
+    saveContainer: {
+      paddingHorizontal: spacing.md,
+      paddingTop: spacing.sm,
+      paddingBottom: spacing.md,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      backgroundColor: colors.background,
+    },
+    saveBtn: {
+      backgroundColor: colors.brand,
+      borderRadius: radii.sm,
+      paddingVertical: spacing.md,
+      alignItems: 'center',
+      minHeight: 52,
+      justifyContent: 'center',
+      ...shadows.brandGlow,
+    },
+    saveBtnPressed: { opacity: 0.85 },
+    saveBtnText: { ...typography.button, color: '#fff' },
+
+    // ── Error ──
+    center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
+    errorText: { ...typography.body, color: colors.error },
   });
 }

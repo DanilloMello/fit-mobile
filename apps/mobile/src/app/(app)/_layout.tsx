@@ -50,18 +50,18 @@ export default function AppLayout() {
       <Tabs.Screen
         name="financial/index"
         options={{
-          title: 'Wallet',
+          title: 'Workouts',
           tabBarIcon: ({ color, size }) => (
-            <TabIcon name="wallet-outline" color={color} size={size} />
+            <TabIcon name="barbell-outline" color={color} size={size} />
           ),
         }}
       />
       <Tabs.Screen
         name="library/index"
         options={{
-          title: 'Workouts',
+          title: 'Wallet',
           tabBarIcon: ({ color, size }) => (
-            <TabIcon name="barbell-outline" color={color} size={size} />
+            <TabIcon name="wallet-outline" color={color} size={size} />
           ),
         }}
       />

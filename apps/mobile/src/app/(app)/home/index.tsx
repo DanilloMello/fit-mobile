@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   Alert,
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -20,6 +19,7 @@ import {
   useThemeColors,
   ColorPalette,
   radii,
+  SegmentedControl,
 } from '@connecthealth/shared/ui';
 import {
   PlanList,
@@ -48,10 +48,6 @@ export default function HomeScreen() {
   const styles = createStyles(colors);
 
   const [activeTab, setActiveTab] = useState<HomeTab>('workouts');
-  const [activeFilter, setActiveFilter] = useState<PlanFilter>('my');
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [planName, setPlanName] = useState('');
-  const [planWeeks, setPlanWeeks] = useState('12');
 
   const { data: plans, isLoading, error, refetch } = usePlans();
   const createPlan = useCreatePlan();
@@ -60,24 +56,12 @@ export default function HomeScreen() {
     router.push(`/(app)/plans/${plan.id}`);
   };
 
-  const handleCreatePlan = async () => {
-    if (!planName.trim()) {
-      Alert.alert('Name required', 'Please enter a plan name.');
-      return;
-    }
-    const totalWeeks = parseInt(planWeeks, 10);
-    if (isNaN(totalWeeks) || totalWeeks < 1) {
-      Alert.alert('Invalid weeks', 'Enter a valid number of weeks.');
-      return;
-    }
+  const handleNewPlan = async () => {
     try {
       const newPlan = await createPlan.mutateAsync({
-        name: planName.trim(),
-        totalWeeks,
+        name: 'Untitled Plan',
+        totalWeeks: 12,
       });
-      setShowCreateModal(false);
-      setPlanName('');
-      setPlanWeeks('12');
       router.push(`/(app)/plans/${newPlan.id}`);
     } catch {
       Alert.alert('Error', 'Could not create plan. Please try again.');
@@ -86,93 +70,61 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      {/* Inline tab bar */}
-      <View style={styles.tabBar}>
-        {TABS.map((tab) => {
-          const isActive = activeTab === tab.value;
-          return (
-            <Pressable
-              key={tab.value}
-              style={styles.tab}
-              onPress={() => setActiveTab(tab.value)}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: isActive }}
-            >
-              <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
-                {tab.label}
-              </Text>
-              {isActive && <View style={styles.tabIndicator} />}
-            </Pressable>
-          );
-        })}
+      {/* ── Segment tabs ─────────────────────── */}
+      <View style={styles.tabsRow}>
+        <SegmentedControl
+          options={TABS}
+          value={activeTab}
+          onChange={setActiveTab}
+        />
       </View>
 
       {activeTab === 'workouts' ? (
         <View style={styles.listContainer}>
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Search row */}
-            <View style={styles.searchRow}>
-              <View style={styles.searchBox}>
-                <Ionicons
-                  name="search-outline"
-                  size={14}
-                  color={colors.textPlaceholder}
-                />
-                <Text style={styles.searchPlaceholder}>Search...</Text>
-              </View>
-              <View style={styles.filterBtn}>
-                <Ionicons
-                  name="options-outline"
-                  size={16}
-                  color={colors.textSecondary}
-                />
-              </View>
+          {/* ── Search row ───────────────────── */}
+          <View style={styles.searchRow}>
+            <View style={styles.searchBox}>
+              <Ionicons name="search-outline" size={16} color={colors.textMuted} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search..."
+                placeholderTextColor={colors.textPlaceholder}
+                editable={false}
+                accessibilityLabel="Search plans"
+                accessibilityHint="Search coming soon"
+              />
             </View>
-
-            {/* Filter chips */}
-            <View style={styles.chips}>
-              {FILTERS.map((f) => {
-                const isActive = activeFilter === f.value;
-                return (
-                  <Pressable
-                    key={f.value}
-                    style={[styles.chip, isActive && styles.chipActive]}
-                    onPress={() => setActiveFilter(f.value)}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: isActive }}
-                  >
-                    <Text
-                      style={[
-                        styles.chipText,
-                        isActive && styles.chipTextActive,
-                      ]}
-                    >
-                      {f.label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
+            <View
+              style={styles.filterBtn}
+              accessibilityRole="button"
+              accessibilityLabel="Filter"
+            >
+              <Ionicons name="options-outline" size={18} color={colors.textMuted} />
             </View>
+          </View>
 
-            {/* Section title */}
-            <Text style={styles.sectionTitle}>My workout plans</Text>
+          {/* ── Filter chips ─────────────────── */}
+          <View style={styles.chipsRow}>
+            <View style={[styles.chip, styles.chipActive]}>
+              <Text style={[styles.chipText, styles.chipTextActive]}>my</Text>
+            </View>
+          </View>
 
-            {/* Plan list */}
-            <PlanList
-              plans={plans}
-              isLoading={isLoading}
-              error={error}
-              onPlanPress={handlePlanPress}
-              onRetry={refetch}
-            />
-          </ScrollView>
+          {/* ── Section title ────────────────── */}
+          <Text style={styles.sectionTitle}>My workout plans</Text>
 
+          {/* ── Plan list ────────────────────── */}
+          <PlanList
+            plans={plans}
+            isLoading={isLoading}
+            error={error}
+            onPlanPress={handlePlanPress}
+            onRetry={refetch}
+          />
+
+          {/* ── FAB ──────────────────────────── */}
           <FAB
-            label="New Plan"
-            onPress={() => setShowCreateModal(true)}
+            onPress={handleNewPlan}
             accessibilityLabel="Create new training plan"
           />
         </View>
@@ -183,63 +135,6 @@ export default function HomeScreen() {
           </Text>
         </View>
       )}
-
-      <Modal
-        visible={showCreateModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowCreateModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalSheet, { backgroundColor: colors.surface }]}>
-            <Text style={styles.modalTitle}>New Training Plan</Text>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Plan name"
-              placeholderTextColor={colors.textPlaceholder}
-              value={planName}
-              onChangeText={setPlanName}
-              autoFocus
-              accessibilityLabel="Plan name"
-            />
-            <View style={styles.weeksRow}>
-              <Text style={styles.weeksLabel}>Total weeks</Text>
-              <TextInput
-                style={[styles.input, styles.weeksInput]}
-                value={planWeeks}
-                onChangeText={setPlanWeeks}
-                keyboardType="number-pad"
-                accessibilityLabel="Total weeks"
-              />
-            </View>
-
-            <View style={styles.modalActions}>
-              <Pressable
-                style={[styles.modalBtn, { backgroundColor: colors.input }]}
-                onPress={() => setShowCreateModal(false)}
-              >
-                <Text style={[styles.modalBtnText, { color: colors.textPrimary }]}>
-                  Cancel
-                </Text>
-              </Pressable>
-              <Pressable
-                style={[
-                  styles.modalBtn,
-                  { backgroundColor: colors.brand },
-                  createPlan.isPending && styles.disabledBtn,
-                ]}
-                onPress={handleCreatePlan}
-                disabled={createPlan.isPending}
-              >
-                <Text style={[styles.modalBtnText, { color: '#fff' }]}>
-                  {createPlan.isPending ? 'Creating…' : 'Create'}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }
@@ -250,27 +145,10 @@ function createStyles(colors: ColorPalette) {
       flex: 1,
       backgroundColor: colors.background,
     },
-
-    // Inline tab bar
-    tabBar: {
-      flexDirection: 'row',
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
-    },
-    tab: {
-      flex: 1,
-      alignItems: 'center',
-      paddingVertical: spacing.sm,
-      position: 'relative',
-    },
-    tabText: {
-      ...typography.label,
-      color: colors.textMuted,
-      fontWeight: '400',
-    },
-    tabTextActive: {
-      color: colors.textPrimary,
-      fontWeight: '600',
+    tabsRow: {
+      paddingHorizontal: spacing.md,
+      paddingTop: spacing.md,
+      paddingBottom: spacing.sm,
     },
     tabIndicator: {
       position: 'absolute',
@@ -284,15 +162,10 @@ function createStyles(colors: ColorPalette) {
     // Workouts content
     listContainer: {
       flex: 1,
-    },
-    scrollContent: {
-      paddingHorizontal: spacing.sm,
-      paddingTop: spacing.sm,
-      // FAB is minHeight:56 at bottom:spacing.xl — ensure content doesn't scroll under it
-      paddingBottom: spacing.xl + 56 + spacing.xl,
+      paddingHorizontal: spacing.md,
     },
 
-    // Search row
+    // ── Search ──
     searchRow: {
       flexDirection: 'row',
       gap: spacing.xs,
@@ -305,15 +178,15 @@ function createStyles(colors: ColorPalette) {
       gap: spacing.xs,
       backgroundColor: colors.input,
       borderRadius: radii.sm,
+      paddingHorizontal: spacing.sm,
+      height: 40,
       borderWidth: 0.5,
       borderColor: colors.border,
-      paddingHorizontal: spacing.sm,
-      paddingVertical: spacing.xs,
-      minHeight: 40,
     },
-    searchPlaceholder: {
+    searchInput: {
+      flex: 1,
       ...typography.bodySmall,
-      color: colors.textPlaceholder,
+      color: colors.textPrimary,
     },
     filterBtn: {
       width: 40,
@@ -326,20 +199,18 @@ function createStyles(colors: ColorPalette) {
       justifyContent: 'center',
     },
 
-    // Filter chips
-    chips: {
+    // ── Chips ──
+    chipsRow: {
       flexDirection: 'row',
-      flexWrap: 'wrap',
       gap: spacing.xs,
       marginBottom: spacing.md,
     },
     chip: {
+      paddingHorizontal: spacing.sm,
       paddingVertical: 6,
-      paddingHorizontal: spacing.md,
       borderRadius: 20,
       borderWidth: 0.5,
       borderColor: colors.border,
-      backgroundColor: 'transparent',
     },
     chipActive: {
       backgroundColor: colors.brand,
@@ -347,21 +218,21 @@ function createStyles(colors: ColorPalette) {
     },
     chipText: {
       ...typography.caption,
-      color: colors.textSecondary,
+      color: colors.textMuted,
     },
     chipTextActive: {
-      color: colors.textPrimary,
-      fontWeight: '500',
+      color: '#fff',
+      fontWeight: '500' as const,
     },
 
-    // Section title
+    // ── Section ──
     sectionTitle: {
       ...typography.label,
       color: colors.textPrimary,
       marginBottom: spacing.sm,
     },
 
-    // Clients placeholder
+    // ── Placeholder ──
     placeholder: {
       flex: 1,
       alignItems: 'center',
@@ -373,46 +244,5 @@ function createStyles(colors: ColorPalette) {
       color: colors.textMuted,
       textAlign: 'center',
     },
-
-    // Modal
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      justifyContent: 'flex-end',
-    },
-    modalSheet: {
-      borderTopLeftRadius: radii.card,
-      borderTopRightRadius: radii.card,
-      padding: spacing.xl,
-      gap: spacing.md,
-    },
-    modalTitle: { ...typography.display, color: colors.textPrimary },
-    input: {
-      backgroundColor: colors.input,
-      borderRadius: radii.sm,
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.sm,
-      ...typography.inputText,
-      color: colors.textPrimary,
-      minHeight: 48,
-    },
-    weeksRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.sm,
-    },
-    weeksLabel: { ...typography.label, color: colors.textSecondary, flex: 1 },
-    weeksInput: { width: 80, textAlign: 'center' },
-    modalActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs },
-    modalBtn: {
-      flex: 1,
-      borderRadius: radii.sm,
-      paddingVertical: spacing.sm,
-      alignItems: 'center',
-      minHeight: 48,
-      justifyContent: 'center',
-    },
-    disabledBtn: { opacity: 0.5 },
-    modalBtnText: { ...typography.button },
   });
 }
