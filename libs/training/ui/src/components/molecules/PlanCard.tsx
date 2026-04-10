@@ -6,10 +6,21 @@ import {
   shadows,
   spacing,
   typography,
+  StatusDot,
+  StatusDotVariant,
   useThemeColors,
   ColorPalette,
 } from '@connecthealth/shared/ui';
+import { PlanStatus } from '@connecthealth/training/domain';
 import { PlanSummaryDto } from '@connecthealth/training/infrastructure';
+
+const STATUS_DOT_MAP: Record<PlanStatus, StatusDotVariant> = {
+  DRAFT: 'draft',
+  ACTIVE: 'active',
+  PAUSED: 'paused',
+  CANCELED: 'canceled',
+  COMPLETED: 'completed',
+};
 
 interface PlanCardProps {
   plan: PlanSummaryDto;
@@ -37,6 +48,7 @@ export function PlanCard({ plan, onPress }: PlanCardProps) {
       accessibilityHint="Double tap to open plan builder"
     >
       <View style={styles.header}>
+        <StatusDot variant={STATUS_DOT_MAP[plan.status]} size={10} />
         <Text style={styles.name} numberOfLines={1}>{plan.name}</Text>
       </View>
 
@@ -88,11 +100,15 @@ function createStyles(colors: ColorPalette) {
       opacity: 0.85,
     },
     header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
       marginBottom: spacing.xxs,
     },
     name: {
       ...typography.button,
       color: colors.textPrimary,
+      flex: 1,
     },
     client: {
       ...typography.bodySmall,
