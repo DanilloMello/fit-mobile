@@ -2,6 +2,7 @@ import React from 'react';
 import { Platform } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useThemeColors } from '@connecthealth/shared/ui';
 
@@ -21,6 +22,7 @@ function TabIcon({
 
 export default function AppLayout() {
   const colors = useThemeColors();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
@@ -30,8 +32,8 @@ export default function AppLayout() {
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
-          height: Platform.select({ ios: 80, android: 60 }),
-          paddingBottom: Platform.select({ ios: 20, android: 8 }),
+          height: Platform.select({ ios: 80, android: 60 })! + insets.bottom,
+          paddingBottom: Platform.select({ ios: 20, android: 8 })! + insets.bottom,
         },
         headerStyle: { backgroundColor: colors.surface },
         headerTintColor: colors.textPrimary,
