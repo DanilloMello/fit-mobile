@@ -120,6 +120,7 @@ export default function HomeScreen() {
             error={error}
             onPlanPress={handlePlanPress}
             onRetry={refetch}
+            contentContainerStyle={styles.planListContent}
           />
 
           {/* ── FAB ──────────────────────────── */}
@@ -150,19 +151,14 @@ function createStyles(colors: ColorPalette) {
       paddingTop: spacing.md,
       paddingBottom: spacing.sm,
     },
-    tabIndicator: {
-      position: 'absolute',
-      bottom: -1,
-      left: 0,
-      right: 0,
-      height: 2,
-      backgroundColor: colors.brand,
-    },
-
     // Workouts content
     listContainer: {
       flex: 1,
       paddingHorizontal: spacing.md,
+    },
+    // FAB is minHeight:56 at bottom:spacing.xl — ensure last card is never hidden
+    planListContent: {
+      paddingBottom: spacing.xl + 56 + spacing.xl,
     },
 
     // ── Search ──
