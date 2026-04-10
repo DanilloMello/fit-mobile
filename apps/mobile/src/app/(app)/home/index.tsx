@@ -256,7 +256,6 @@ function createStyles(colors: ColorPalette) {
       flexDirection: 'row',
       borderBottomWidth: 1,
       borderBottomColor: colors.border,
-      paddingHorizontal: spacing.md,
     },
     tab: {
       flex: 1,
@@ -271,15 +270,14 @@ function createStyles(colors: ColorPalette) {
     },
     tabTextActive: {
       color: colors.textPrimary,
-      fontWeight: '500',
+      fontWeight: '600',
     },
     tabIndicator: {
       position: 'absolute',
       bottom: -1,
-      left: '20%',
-      right: '20%',
+      left: 0,
+      right: 0,
       height: 2,
-      borderRadius: 2,
       backgroundColor: colors.brand,
     },
 
@@ -288,7 +286,10 @@ function createStyles(colors: ColorPalette) {
       flex: 1,
     },
     scrollContent: {
-      padding: spacing.sm,
+      paddingHorizontal: spacing.sm,
+      paddingTop: spacing.sm,
+      // FAB is minHeight:56 at bottom:spacing.xl — ensure content doesn't scroll under it
+      paddingBottom: spacing.xl + 56 + spacing.xl,
     },
 
     // Search row
