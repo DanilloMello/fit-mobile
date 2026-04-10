@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   Alert,
-  Modal,
   Pressable,
   StyleSheet,
   Text,
@@ -10,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 import {
   FAB,
@@ -39,9 +39,6 @@ export default function HomeScreen() {
   const styles = createStyles(colors);
 
   const [activeTab, setActiveTab] = useState<HomeTab>('workouts');
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [planName, setPlanName] = useState('');
-  const [planWeeks, setPlanWeeks] = useState('12');
 
   const { data: plans, isLoading, error, refetch } = usePlans();
   const createPlan = useCreatePlan();
@@ -50,24 +47,12 @@ export default function HomeScreen() {
     router.push(`/(app)/plans/${plan.id}`);
   };
 
-  const handleCreatePlan = async () => {
-    if (!planName.trim()) {
-      Alert.alert('Name required', 'Please enter a plan name.');
-      return;
-    }
-    const totalWeeks = parseInt(planWeeks, 10);
-    if (isNaN(totalWeeks) || totalWeeks < 1) {
-      Alert.alert('Invalid weeks', 'Enter a valid number of weeks.');
-      return;
-    }
+  const handleNewPlan = async () => {
     try {
       const newPlan = await createPlan.mutateAsync({
-        name: planName.trim(),
-        totalWeeks,
+        name: 'Untitled Plan',
+        totalWeeks: 12,
       });
-      setShowCreateModal(false);
-      setPlanName('');
-      setPlanWeeks('12');
       router.push(`/(app)/plans/${newPlan.id}`);
     } catch {
       Alert.alert('Error', 'Could not create plan. Please try again.');
@@ -76,8 +61,8 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Home</Text>
+      {/* ── Segment tabs ─────────────────────── */}
+      <View style={styles.tabsRow}>
         <SegmentedControl
           options={TABS}
           value={activeTab}
@@ -87,6 +72,39 @@ export default function HomeScreen() {
 
       {activeTab === 'workouts' ? (
         <View style={styles.listContainer}>
+          {/* ── Search row ───────────────────── */}
+          <View style={styles.searchRow}>
+            <View style={styles.searchBox}>
+              <Ionicons name="search-outline" size={16} color={colors.textMuted} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search..."
+                placeholderTextColor={colors.textPlaceholder}
+                editable={false}
+                accessibilityLabel="Search plans"
+                accessibilityHint="Search coming soon"
+              />
+            </View>
+            <View
+              style={styles.filterBtn}
+              accessibilityRole="button"
+              accessibilityLabel="Filter"
+            >
+              <Ionicons name="options-outline" size={18} color={colors.textMuted} />
+            </View>
+          </View>
+
+          {/* ── Filter chips ─────────────────── */}
+          <View style={styles.chipsRow}>
+            <View style={[styles.chip, styles.chipActive]}>
+              <Text style={[styles.chipText, styles.chipTextActive]}>my</Text>
+            </View>
+          </View>
+
+          {/* ── Section title ────────────────── */}
+          <Text style={styles.sectionTitle}>My workout plans</Text>
+
+          {/* ── Plan list ────────────────────── */}
           <PlanList
             plans={plans}
             isLoading={isLoading}
@@ -94,9 +112,10 @@ export default function HomeScreen() {
             onPlanPress={handlePlanPress}
             onRetry={refetch}
           />
+
+          {/* ── FAB ──────────────────────────── */}
           <FAB
-            label="New Plan"
-            onPress={() => setShowCreateModal(true)}
+            onPress={handleNewPlan}
             accessibilityLabel="Create new training plan"
           />
         </View>
@@ -107,63 +126,6 @@ export default function HomeScreen() {
           </Text>
         </View>
       )}
-
-      <Modal
-        visible={showCreateModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowCreateModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalSheet, { backgroundColor: colors.surface }]}>
-            <Text style={styles.modalTitle}>New Training Plan</Text>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Plan name"
-              placeholderTextColor={colors.textPlaceholder}
-              value={planName}
-              onChangeText={setPlanName}
-              autoFocus
-              accessibilityLabel="Plan name"
-            />
-            <View style={styles.weeksRow}>
-              <Text style={styles.weeksLabel}>Total weeks</Text>
-              <TextInput
-                style={[styles.input, styles.weeksInput]}
-                value={planWeeks}
-                onChangeText={setPlanWeeks}
-                keyboardType="number-pad"
-                accessibilityLabel="Total weeks"
-              />
-            </View>
-
-            <View style={styles.modalActions}>
-              <Pressable
-                style={[styles.modalBtn, { backgroundColor: colors.input }]}
-                onPress={() => setShowCreateModal(false)}
-              >
-                <Text style={[styles.modalBtnText, { color: colors.textPrimary }]}>
-                  Cancel
-                </Text>
-              </Pressable>
-              <Pressable
-                style={[
-                  styles.modalBtn,
-                  { backgroundColor: colors.brand },
-                  createPlan.isPending && styles.disabledBtn,
-                ]}
-                onPress={handleCreatePlan}
-                disabled={createPlan.isPending}
-              >
-                <Text style={[styles.modalBtnText, { color: '#fff' }]}>
-                  {createPlan.isPending ? 'Creating…' : 'Create'}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }
@@ -174,20 +136,84 @@ function createStyles(colors: ColorPalette) {
       flex: 1,
       backgroundColor: colors.background,
     },
-    header: {
+    tabsRow: {
       paddingHorizontal: spacing.md,
       paddingTop: spacing.md,
       paddingBottom: spacing.sm,
-      gap: spacing.md,
-      backgroundColor: colors.background,
-    },
-    title: {
-      ...typography.display,
-      color: colors.textPrimary,
     },
     listContainer: {
       flex: 1,
+      paddingHorizontal: spacing.md,
     },
+
+    // ── Search ──
+    searchRow: {
+      flexDirection: 'row',
+      gap: spacing.xs,
+      marginBottom: spacing.sm,
+    },
+    searchBox: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      backgroundColor: colors.input,
+      borderRadius: radii.sm,
+      paddingHorizontal: spacing.sm,
+      height: 40,
+      borderWidth: 0.5,
+      borderColor: colors.border,
+    },
+    searchInput: {
+      flex: 1,
+      ...typography.bodySmall,
+      color: colors.textPrimary,
+    },
+    filterBtn: {
+      width: 40,
+      height: 40,
+      backgroundColor: colors.input,
+      borderRadius: radii.sm,
+      borderWidth: 0.5,
+      borderColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+    // ── Chips ──
+    chipsRow: {
+      flexDirection: 'row',
+      gap: spacing.xs,
+      marginBottom: spacing.md,
+    },
+    chip: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 6,
+      borderRadius: 20,
+      borderWidth: 0.5,
+      borderColor: colors.border,
+    },
+    chipActive: {
+      backgroundColor: colors.brand,
+      borderColor: colors.brand,
+    },
+    chipText: {
+      ...typography.caption,
+      color: colors.textMuted,
+    },
+    chipTextActive: {
+      color: '#fff',
+      fontWeight: '500' as const,
+    },
+
+    // ── Section ──
+    sectionTitle: {
+      ...typography.label,
+      color: colors.textPrimary,
+      marginBottom: spacing.sm,
+    },
+
+    // ── Placeholder ──
     placeholder: {
       flex: 1,
       alignItems: 'center',
@@ -199,45 +225,5 @@ function createStyles(colors: ColorPalette) {
       color: colors.textMuted,
       textAlign: 'center',
     },
-    // Modal
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      justifyContent: 'flex-end',
-    },
-    modalSheet: {
-      borderTopLeftRadius: radii.card,
-      borderTopRightRadius: radii.card,
-      padding: spacing.xl,
-      gap: spacing.md,
-    },
-    modalTitle: { ...typography.display, color: colors.textPrimary },
-    input: {
-      backgroundColor: colors.input,
-      borderRadius: radii.sm,
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.sm,
-      ...typography.inputText,
-      color: colors.textPrimary,
-      minHeight: 48,
-    },
-    weeksRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.sm,
-    },
-    weeksLabel: { ...typography.label, color: colors.textSecondary, flex: 1 },
-    weeksInput: { width: 80, textAlign: 'center' },
-    modalActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs },
-    modalBtn: {
-      flex: 1,
-      borderRadius: radii.sm,
-      paddingVertical: spacing.sm,
-      alignItems: 'center',
-      minHeight: 48,
-      justifyContent: 'center',
-    },
-    disabledBtn: { opacity: 0.5 },
-    modalBtnText: { ...typography.button },
   });
 }

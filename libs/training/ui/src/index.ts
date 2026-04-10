@@ -19,5 +19,20 @@ export { useExercises, useExerciseSearch } from './hooks/useExercises';
 export type { ExerciseDto } from './hooks/useExercises';
 
 // Components
-export { PlanCard, MesocycleCard } from './components/molecules';
-export { PlanList } from './components/organisms';
+export { PlanCard, MesocycleCard, MicrocycleRow, AddItemRow } from './components/molecules';
+export {
+  PlanList,
+  MesocycleAccordionCard,
+  PlanSettingsSheet,
+  MesocycleFormSheet,
+  MicrocycleFormSheet,
+} from './components/organisms';
+
+// Mock data
+export type {
+  PlanBuilderStatus,
+  MockMicrocycleDto,
+  MockMesocycleDto,
+  MockPlanDetailDto,
+} from './__mocks__/planBuilderMock';
+export { MOCK_PLAN } from './__mocks__/planBuilderMock';

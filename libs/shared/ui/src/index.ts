@@ -5,11 +5,15 @@ export {
   SegmentedControl,
   FAB,
   StatusDot,
+  StatusBadge,
+  ProgressBar,
+  StepperField,
 } from './components/molecules';
 export type {
   InputFieldProps,
   SegmentedControlOption,
   StatusDotVariant,
+  StatusBadgeVariant,
 } from './components/molecules';
 
 export { useThemeColors } from './hooks/useThemeColors';

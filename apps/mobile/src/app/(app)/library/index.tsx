@@ -11,8 +11,8 @@ export default function LibraryScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <View style={styles.container}>
-        <Text style={styles.title}>Library</Text>
-        <Text style={styles.placeholder}>Exercise library coming in Sprint 3</Text>
+        <Text style={styles.title}>Wallet</Text>
+        <Text style={styles.placeholder}>Coming soon</Text>
       </View>
     </SafeAreaView>
   );
