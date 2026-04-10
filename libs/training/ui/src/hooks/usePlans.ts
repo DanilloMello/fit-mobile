@@ -6,19 +6,17 @@ import {
   planApi,
   PlanSummaryDto,
 } from '@connecthealth/training/infrastructure';
-import { PlanStatus } from '@connecthealth/training/domain';
 
 export const planKeys = {
   all: ['plans'] as const,
-  list: (filters?: { status?: PlanStatus }) =>
-    [...planKeys.all, 'list', filters] as const,
+  list: () => [...planKeys.all, 'list'] as const,
   detail: (id: string) => [...planKeys.all, 'detail', id] as const,
 };
 
-export function usePlans(filters?: { status?: PlanStatus }) {
+export function usePlans() {
   return useQuery({
-    queryKey: planKeys.list(filters),
-    queryFn: () => planApi.list(filters),
+    queryKey: planKeys.list(),
+    queryFn: () => planApi.list(),
     select: (res) => res.data,
   });
 }

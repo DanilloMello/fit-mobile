@@ -4,6 +4,7 @@ import {
   StyleSheet,
   Text,
   View,
+  ViewStyle,
 } from 'react-native';
 
 import {
@@ -24,6 +25,7 @@ interface PlanListProps {
   onPlanPress: (plan: PlanSummaryDto) => void;
   onRetry: () => void;
   ListHeaderComponent?: React.ReactElement;
+  contentContainerStyle?: ViewStyle;
 }
 
 export function PlanList({
@@ -33,6 +35,7 @@ export function PlanList({
   onPlanPress,
   onRetry,
   ListHeaderComponent,
+  contentContainerStyle,
 }: PlanListProps) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
@@ -59,7 +62,7 @@ export function PlanList({
       renderItem={({ item }) => (
         <PlanCard plan={item} onPress={onPlanPress} />
       )}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, contentContainerStyle]}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
       ListHeaderComponent={ListHeaderComponent}
       ListEmptyComponent={

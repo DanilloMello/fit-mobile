@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Alert,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -19,7 +18,6 @@ import {
   useThemeColors,
   ColorPalette,
   radii,
-  SegmentedControl,
 } from '@connecthealth/shared/ui';
 import {
   PlanList,
@@ -29,18 +27,10 @@ import {
 import { PlanSummaryDto } from '@connecthealth/training/infrastructure';
 
 type HomeTab = 'workouts' | 'clients';
-type PlanFilter = 'my' | 'active' | 'inactive' | 'drafts';
 
 const TABS: { label: string; value: HomeTab }[] = [
-  { label: 'Workout', value: 'workouts' },
+  { label: 'Workouts', value: 'workouts' },
   { label: 'Clients', value: 'clients' },
-];
-
-const FILTERS: { label: string; value: PlanFilter }[] = [
-  { label: 'my', value: 'my' },
-  { label: 'active', value: 'active' },
-  { label: 'inactive', value: 'inactive' },
-  { label: 'drafts', value: 'drafts' },
 ];
 
 export default function HomeScreen() {
@@ -69,14 +59,27 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      {/* ── Segment tabs ─────────────────────── */}
-      <View style={styles.tabsRow}>
-        <SegmentedControl
-          options={TABS}
-          value={activeTab}
-          onChange={setActiveTab}
-        />
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
+      {/* ── Underline tab bar ────────────────── */}
+      <View style={styles.tabBar}>
+        {TABS.map((tab) => {
+          const isActive = tab.value === activeTab;
+          return (
+            <Pressable
+              key={tab.value}
+              style={styles.tab}
+              onPress={() => setActiveTab(tab.value)}
+              accessibilityRole="tab"
+              accessibilityLabel={tab.label}
+              accessibilityState={{ selected: isActive }}
+            >
+              <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
+                {tab.label}
+              </Text>
+              {isActive && <View style={styles.tabIndicator} />}
+            </Pressable>
+          );
+        })}
       </View>
 
       {activeTab === 'workouts' ? (
@@ -103,13 +106,6 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          {/* ── Filter chips ─────────────────── */}
-          <View style={styles.chipsRow}>
-            <View style={[styles.chip, styles.chipActive]}>
-              <Text style={[styles.chipText, styles.chipTextActive]}>my</Text>
-            </View>
-          </View>
-
           {/* ── Section title ────────────────── */}
           <Text style={styles.sectionTitle}>My workout plans</Text>
 
@@ -120,6 +116,7 @@ export default function HomeScreen() {
             error={error}
             onPlanPress={handlePlanPress}
             onRetry={refetch}
+            contentContainerStyle={styles.planListContent}
           />
 
           {/* ── FAB ──────────────────────────── */}
@@ -145,10 +142,24 @@ function createStyles(colors: ColorPalette) {
       flex: 1,
       backgroundColor: colors.background,
     },
-    tabsRow: {
-      paddingHorizontal: spacing.md,
-      paddingTop: spacing.md,
-      paddingBottom: spacing.sm,
+    tabBar: {
+      flexDirection: 'row',
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    tab: {
+      flex: 1,
+      paddingVertical: spacing.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    tabText: {
+      ...typography.label,
+      color: colors.textMuted,
+    },
+    tabTextActive: {
+      color: colors.textPrimary,
+      fontWeight: '600' as const,
     },
     tabIndicator: {
       position: 'absolute',
@@ -163,6 +174,11 @@ function createStyles(colors: ColorPalette) {
     listContainer: {
       flex: 1,
       paddingHorizontal: spacing.md,
+      paddingTop: spacing.sm,
+    },
+    // FAB is minHeight:56 at bottom:spacing.xl — ensure last card is never hidden
+    planListContent: {
+      paddingBottom: spacing.xl + 56 + spacing.xl,
     },
 
     // ── Search ──
@@ -197,32 +213,6 @@ function createStyles(colors: ColorPalette) {
       borderColor: colors.border,
       alignItems: 'center',
       justifyContent: 'center',
-    },
-
-    // ── Chips ──
-    chipsRow: {
-      flexDirection: 'row',
-      gap: spacing.xs,
-      marginBottom: spacing.md,
-    },
-    chip: {
-      paddingHorizontal: spacing.sm,
-      paddingVertical: 6,
-      borderRadius: 20,
-      borderWidth: 0.5,
-      borderColor: colors.border,
-    },
-    chipActive: {
-      backgroundColor: colors.brand,
-      borderColor: colors.brand,
-    },
-    chipText: {
-      ...typography.caption,
-      color: colors.textMuted,
-    },
-    chipTextActive: {
-      color: '#fff',
-      fontWeight: '500' as const,
     },
 
     // ── Section ──

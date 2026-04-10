@@ -22,14 +22,6 @@ const STATUS_DOT_MAP: Record<PlanStatus, StatusDotVariant> = {
   COMPLETED: 'completed',
 };
 
-const STATUS_LABEL: Record<PlanStatus, string> = {
-  DRAFT: 'Draft',
-  ACTIVE: 'Active',
-  PAUSED: 'Paused',
-  CANCELED: 'Canceled',
-  COMPLETED: 'Completed',
-};
-
 interface PlanCardProps {
   plan: PlanSummaryDto;
   onPress: (plan: PlanSummaryDto) => void;
@@ -52,15 +44,12 @@ export function PlanCard({ plan, onPress }: PlanCardProps) {
       ]}
       onPress={() => onPress(plan)}
       accessibilityRole="button"
-      accessibilityLabel={`${plan.name}, ${STATUS_LABEL[plan.status]}`}
+      accessibilityLabel={plan.name}
       accessibilityHint="Double tap to open plan builder"
     >
       <View style={styles.header}>
-        <View style={styles.titleRow}>
-          <StatusDot variant={STATUS_DOT_MAP[plan.status]} size={10} />
-          <Text style={styles.name} numberOfLines={1}>{plan.name}</Text>
-        </View>
-        <Text style={styles.status}>{STATUS_LABEL[plan.status]}</Text>
+        <StatusDot variant={STATUS_DOT_MAP[plan.status]} size={10} />
+        <Text style={styles.name} numberOfLines={1}>{plan.name}</Text>
       </View>
 
       {plan.clientName ? (
@@ -113,24 +102,13 @@ function createStyles(colors: ColorPalette) {
     header: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: spacing.sm,
-      marginBottom: spacing.xxs,
-    },
-    titleRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
       gap: spacing.xs,
-      flex: 1,
+      marginBottom: spacing.xxs,
     },
     name: {
       ...typography.button,
       color: colors.textPrimary,
       flex: 1,
-    },
-    status: {
-      ...typography.caption,
-      color: colors.textMuted,
     },
     client: {
       ...typography.bodySmall,
