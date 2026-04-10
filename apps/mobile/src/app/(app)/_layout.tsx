@@ -81,6 +81,10 @@ export default function AppLayout() {
       <Tabs.Screen name="plans/index" options={{ href: null }} />
       <Tabs.Screen name="plans/[id]" options={{ href: null, headerShown: true }} />
       <Tabs.Screen
+        name="plans/[id]/week/[weekId]"
+        options={{ href: null, headerShown: true }}
+      />
+      <Tabs.Screen
         name="plans/[id]/workout-day/[dayId]"
         options={{ href: null, headerShown: true }}
       />

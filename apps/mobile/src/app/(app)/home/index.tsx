@@ -30,7 +30,7 @@ type HomeTab = 'workouts' | 'clients';
 type PlanFilter = 'my' | 'active' | 'inactive' | 'drafts';
 
 const TABS: { label: string; value: HomeTab }[] = [
-  { label: 'Workout', value: 'workouts' },
+  { label: 'Workouts', value: 'workouts' },
   { label: 'Clients', value: 'clients' },
 ];
 
