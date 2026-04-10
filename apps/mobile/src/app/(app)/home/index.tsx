@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Alert,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -19,7 +18,6 @@ import {
   useThemeColors,
   ColorPalette,
   radii,
-  SegmentedControl,
 } from '@connecthealth/shared/ui';
 import {
   PlanList,
@@ -69,14 +67,27 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      {/* ── Segment tabs ─────────────────────── */}
-      <View style={styles.tabsRow}>
-        <SegmentedControl
-          options={TABS}
-          value={activeTab}
-          onChange={setActiveTab}
-        />
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
+      {/* ── Underline tab bar ────────────────── */}
+      <View style={styles.tabBar}>
+        {TABS.map((tab) => {
+          const isActive = tab.value === activeTab;
+          return (
+            <Pressable
+              key={tab.value}
+              style={styles.tab}
+              onPress={() => setActiveTab(tab.value)}
+              accessibilityRole="tab"
+              accessibilityLabel={tab.label}
+              accessibilityState={{ selected: isActive }}
+            >
+              <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
+                {tab.label}
+              </Text>
+              {isActive && <View style={styles.tabIndicator} />}
+            </Pressable>
+          );
+        })}
       </View>
 
       {activeTab === 'workouts' ? (
@@ -146,15 +157,39 @@ function createStyles(colors: ColorPalette) {
       flex: 1,
       backgroundColor: colors.background,
     },
-    tabsRow: {
-      paddingHorizontal: spacing.md,
-      paddingTop: spacing.md,
-      paddingBottom: spacing.sm,
+    tabBar: {
+      flexDirection: 'row',
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
     },
+    tab: {
+      flex: 1,
+      paddingVertical: spacing.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    tabText: {
+      ...typography.label,
+      color: colors.textMuted,
+    },
+    tabTextActive: {
+      color: colors.textPrimary,
+      fontWeight: '600' as const,
+    },
+    tabIndicator: {
+      position: 'absolute',
+      bottom: -1,
+      left: 0,
+      right: 0,
+      height: 2,
+      backgroundColor: colors.brand,
+    },
+
     // Workouts content
     listContainer: {
       flex: 1,
       paddingHorizontal: spacing.md,
+      paddingTop: spacing.sm,
     },
     // FAB is minHeight:56 at bottom:spacing.xl — ensure last card is never hidden
     planListContent: {
