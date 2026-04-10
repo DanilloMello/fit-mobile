@@ -8,12 +8,9 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Profile</Text>
-      <Text style={styles.subtitle}>
-        Your account settings
-      </Text>
+      <Text style={styles.title}>Settings</Text>
       <Text style={styles.placeholder}>
-        Placeholder - Profile screen to be implemented
+        Coming soon
       </Text>
     </View>
   );

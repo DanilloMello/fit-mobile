@@ -2,12 +2,11 @@ import React from 'react';
 import {
   Pressable,
   StyleSheet,
-  Text,
-  View,
+  Text
 } from 'react-native';
 
-import { radii, shadows, spacing, typography } from '../../tokens';
 import { useThemeColors } from '../../hooks/useThemeColors';
+import { shadows, spacing, typography } from '../../tokens';
 
 interface FABProps {
   label?: string;

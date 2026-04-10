@@ -11,8 +11,8 @@ export default function FinancialScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <View style={styles.container}>
-        <Text style={styles.title}>Financial</Text>
-        <Text style={styles.placeholder}>Coming in Sprint 6</Text>
+        <Text style={styles.title}>Workouts</Text>
+        <Text style={styles.placeholder}>Coming soon</Text>
       </View>
     </SafeAreaView>
   );
